@@ -2,87 +2,137 @@ package main
 
 import (
 	"fmt"
+	"io"
+	"log"
+	"net/http"
+	"strings"
 
-	"github.com/gocolly/colly/v2"
+	"github.com/PuerkitoBio/goquery"
 )
 
+// func getHtmlForForDate(htmlContent, date string) string {
+// 	re := regexp.MustCompile(fmt.Sprintf(`(?s)<div class="date">%s</div>(.*?)<div class="date">`, date))
+// 	matches := re.FindStringSubmatch(htmlContent)
+// 	if len(matches) <= 1 {
+// 		fmt.Printf("No HTML for date %s", date)
+// 		return ""
+// 	}
+
+// 	return matches[1]
+// }
+
 func main() {
-	c := colly.NewCollector()
+	response, err := http.Get("https://www.jeopardy.com/track/jeopardata")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer response.Body.Close()
+	if response.StatusCode != http.StatusOK {
+		log.Fatalf("Error fetching the page: %s", response.Status)
+	}
 
-	// get all dates
+	body, err := io.ReadAll(response.Body)
+	if err != nil {
+		log.Fatal(err)
+	}
+	htmlContent := string(body)
 
-	// get all last names
-	var lastNames []string
-	c.OnHTML(".name-1", func(e *colly.HTMLElement) {
-		// e.Text gets the text content of the found element
-		lastNames = append(lastNames, e.Text)
+	// HTML content between 2 date tags
+	//htmlForDate := getHtmlForForDate(htmlContent, "March 6, 2024")
+
+	// TODO: only match for the current date!
+	htmlOneGame := htmlContent
+
+	doc, err := goquery.NewDocumentFromReader(strings.NewReader(htmlOneGame))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// get the game's contestant information
+	doc.Find(".contestant").Each(func(i int, s *goquery.Selection) {
+		lastName := strings.TrimSpace(s.Find(".name-1").Text())
+		firstName := strings.TrimSpace(s.Find(".name-0").Text())
+		home := strings.TrimSpace(s.Find(".home").Text())
+		homeCityState := strings.Split(home, ", ")
+		homeCity, homeState := strings.TrimSpace(homeCityState[0]), strings.TrimSpace(homeCityState[1])
+		fmt.Printf("%s %s from %s, %s", lastName, firstName, homeCity, homeState)
+		fmt.Println()
 	})
 
-	// get all first names
-	var firstNames []string
-	c.OnHTML(".name-0", func(e *colly.HTMLElement) {
-		// e.Text gets the text content of the found element
-		firstNames = append(firstNames, e.Text)
+	// get the Jeopardy Round information for each game
+	doc.Find(".jeopardy-round").Each(func(index int, round *goquery.Selection) {
+		// first row is the header and skipping it
+		if index == 0 {
+			return
+		}
+
+		firstName := round.Find(".name-0").Text()
+		lastName := round.Find(".name-1").Text()
+		name := firstName + " " + lastName
+
+		att := strings.TrimSpace(round.Find("td[data-header='ATT']").Text())
+		buz := strings.TrimSpace(round.Find("td[data-header='BUZ']").Text())
+		buzPercent := strings.TrimSpace(round.Find("td[data-header='BUZ %']").Text())
+		corInc := strings.TrimSpace(round.Find("td[data-header='COR/INC']").Text())
+		correctPercent := strings.TrimSpace(round.Find("td[data-header='CORRECT %']").Text())
+		dd := strings.TrimSpace(round.Find("td[data-header='DD']").Text())
+		eorScore := strings.TrimSpace(round.Find("td[data-header='EOR SCORE']").Text())
+
+		fmt.Printf("J Contestant: %d, %s\n", index, name)
+		fmt.Printf("ATT: %s, BUZ: %s, BUZ %%: %s, COR/INC: %s, CORRECT %%: %s, DD: %s, EOR SCORE: %s\n", att, buz, buzPercent, corInc, correctPercent, dd, eorScore)
+		fmt.Println("-----")
+		index += 1
 	})
 
-	// get all ATTs
-	var atts []string
-	c.OnHTML(`td[data-header="ATT"]`, func(e *colly.HTMLElement) {
-		// e.Text gets the text content of the found element
-		atts = append(atts, e.Text)
+	// TODO: get the double jeopary round info for each game
+	doc.Find(".jeopardy-round").Each(func(index int, round *goquery.Selection) {
+		// first row is the header and skipping it
+		if index == 0 {
+			return
+		}
+
+		firstName := round.Find(".name-0").Text()
+		lastName := round.Find(".name-1").Text()
+		name := firstName + " " + lastName
+
+		att := strings.TrimSpace(round.Find("td[data-header='ATT']").Text())
+		buz := strings.TrimSpace(round.Find("td[data-header='BUZ']").Text())
+		buzPercent := strings.TrimSpace(round.Find("td[data-header='BUZ %']").Text())
+		corInc := strings.TrimSpace(round.Find("td[data-header='COR/INC']").Text())
+		correctPercent := strings.TrimSpace(round.Find("td[data-header='CORRECT %']").Text())
+		dd := strings.TrimSpace(round.Find("td[data-header='DD']").Text())
+		eorScore := strings.TrimSpace(round.Find("td[data-header='EOR SCORE']").Text())
+
+		fmt.Printf("DD Contestant: %d, %s\n", index, name)
+		fmt.Printf("ATT: %s, BUZ: %s, BUZ %%: %s, COR/INC: %s, CORRECT %%: %s, DD: %s, EOR SCORE: %s\n", att, buz, buzPercent, corInc, correctPercent, dd, eorScore)
+		fmt.Println("-----")
+		index += 1
 	})
 
-	// get all Buz
-	var buzs []string
-	c.OnHTML(`td[data-header="BUZ"]`, func(e *colly.HTMLElement) {
-		// e.Text gets the text content of the found element
-		buzs = append(buzs, e.Text)
+	// TODO: get the final jeopary round info for each game
+
+	// get the Game Totals info for each game
+	doc.Find(".game-totals").Each(func(index int, round *goquery.Selection) {
+		// first row is the header and skipping it
+		if index == 0 {
+			return
+		}
+
+		firstName := round.Find(".name-0").Text()
+		lastName := round.Find(".name-1").Text()
+		name := firstName + " " + lastName
+
+		att := strings.TrimSpace(round.Find("td[data-header='ATT']").Text())
+		buz := strings.TrimSpace(round.Find("td[data-header='BUZ']").Text())
+		buzPercent := strings.TrimSpace(round.Find("td[data-header='BUZ %']").Text())
+		corInc := strings.TrimSpace(round.Find("td[data-header='COR/INC']").Text())
+		correctPercent := strings.TrimSpace(round.Find("td[data-header='CORRECT %']").Text())
+		dd := strings.TrimSpace(round.Find("td[data-header='DD (COR/INC)']").Text())
+		finalScore := strings.TrimSpace(round.Find("td[data-header='Final Score']").Text())
+
+		fmt.Printf("F Contestant: %d, %s\n", index, name)
+		fmt.Printf("ATT: %s, BUZ: %s, BUZ %%: %s, COR/INC: %s, CORRECT %%: %s, DD (COR/INC): %s, Final Score: %s\n", att, buz, buzPercent, corInc, correctPercent, dd, finalScore)
+		fmt.Println("-----")
+		index += 1
 	})
-
-	// get all BUZ %
-	var buzPercentages []string
-	c.OnHTML(`td[data-header="BUZ %"]`, func(e *colly.HTMLElement) {
-		// e.Text gets the text content of the found element
-		buzPercentages = append(buzPercentages, e.Text)
-	})
-
-	// get all COR/INC
-	var corrects []string
-	c.OnHTML(`td[data-header="COR/INC"] span.cor`, func(e *colly.HTMLElement) {
-		// e.Text gets the text content of the found element
-		corrects = append(corrects, e.Text)
-	})
-
-	// get all inc
-	var incorrects []string
-	c.OnHTML(`td[data-header="COR/INC"] span.inc`, func(e *colly.HTMLElement) {
-		// e.Text gets the text content of the found element
-		incorrects = append(incorrects, e.Text)
-	})
-
-	// get all CORRECT %
-	var correctPercentages []string
-	c.OnHTML(`td[data-header="CORRECT %"]`, func(e *colly.HTMLElement) {
-		// e.Text gets the text content of the found element
-		correctPercentages = append(correctPercentages, e.Text)
-	})
-
-	// get EOR SCORE
-	var eorScores []string
-	c.OnHTML(`td[data-header="EOR SCORE"]`, func(e *colly.HTMLElement) {
-		// e.Text gets the text content of the found element
-		eorScores = append(eorScores, e.Text)
-	})
-
-	c.Visit("https://www.jeopardy.com/track/jeopardata")
-
-	fmt.Println(lastNames)
-
-	// for i := 0; i < len(lastNames); i++ {
-	// 	lastName, firstName, att, buz := lastNames[i], firstNames[i], atts[i], buzs[i]
-	// 	buzPercentage, correct, eor := buzPercentages[i], corrects[i], eorScores[i]
-	// 	incorrect, correctPercentage := incorrects[i], correctPercentages[i]
-	// 	fmt.Printf("%s, %s, %s, %s, %s, %s, %s, %s, %s", lastName, firstName, att, buz, buzPercentage, correct, incorrect, correctPercentage, eor)
-	// 	fmt.Println("\n\n")
-	// }
 }
