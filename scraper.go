@@ -140,8 +140,6 @@ func getDoubleJeopardyRound(doc *goquery.Document, episode string) ([]DoubleJeop
 		correctPercent, _ := strconv.Atoi(strings.TrimSuffix(strings.TrimSpace(round.Find("td[data-header='CORRECT %']").Text()), "%"))
 
 		dd1Dirty := strings.TrimSpace(round.Find("td[data-header='DD#1']").Text())
-		fmt.Println("HERE")
-		fmt.Println(dd1Dirty)
 		dd1Dirty = strings.Replace(dd1Dirty, "$", "", -1)
 		dd1Clean := strings.Replace(dd1Dirty, ",", "", -1)
 		dd1, _ := strconv.Atoi(dd1Clean)
@@ -214,13 +212,6 @@ func getFinalJeopardyRound(doc *goquery.Document, episode string) ([]FinalJeopar
 		}
 		index += 1
 		finalJeopardyRound = append(finalJeopardyRound, newRound)
-
-		fmt.Printf("Contestant: %s, %s\nStarting Final Jeopardy Score: %d\nFinal Jeopardy Wager: %d\nFinal Score: %d\n",
-			newRound.LastName, newRound.FirstName,
-			newRound.StartingFjScore,
-			newRound.FjWager,
-			newRound.FinalScore,
-		)
 	})
 
 	return finalJeopardyRound, nil
@@ -281,23 +272,23 @@ func getGameTotals(doc *goquery.Document, episode string) ([]JeopardyGameBoxScor
 		finalScore, _ := strconv.Atoi(finalScoreClean)
 
 		tempTotal := JeopardyGameBoxScoreTotal{
-			EpisodeNumber:       episode,
-			Date:                "",
-			LastName:            lastName,
-			FirstName:           firstName,
-			City:                "",
-			State:               "",
-			TotalAtt:            att,
-			TotalBuz:            buz,
-			TotalBuzPercentage:  buzPercent,
-			TotalCorrect:        correct,
-			TotalIncorrect:      incorrect,
-			CorrectPercentage:   correctPercent,
-			TotalDdCorrect:      ddCorrect,
-			TotalDdIncorrect:    ddIncorrect,
-			TotalDdWinnings:     ddWinnings,
-			FinalScore:          finalScore,
-			TotalTripleStumpers: 0,
+			EpisodeNumber:             episode,
+			Date:                      "",
+			LastName:                  lastName,
+			FirstName:                 firstName,
+			City:                      "",
+			State:                     "",
+			TotalAtt:                  att,
+			TotalBuz:                  buz,
+			TotalBuzPercentage:        buzPercent,
+			TotalCorrect:              correct,
+			TotalIncorrect:            incorrect,
+			CorrectPercentage:         correctPercent,
+			TotalDailyDoubleCorrect:   ddCorrect,
+			TotalDailyDoubleIncorrect: ddIncorrect,
+			TotalDailyDoubleWinnings:  ddWinnings,
+			FinalScore:                finalScore,
+			TotalTripleStumpers:       0,
 		}
 		index += 1
 		boxScoreTotals = append(boxScoreTotals, tempTotal)
@@ -308,7 +299,7 @@ func getGameTotals(doc *goquery.Document, episode string) ([]JeopardyGameBoxScor
 
 func main() {
 	var allEpisodeBoxScoreTotals []JeopardyGameBoxScoreTotal
-	//var allEpisodeJeopardyGameBoxScores []JeopardyGameBoxScore
+	var allEpisodeJeopardyGameBoxScores []JeopardyGameBoxScore
 
 	totalNumberOfWebPages := 73
 	for i := 0; i <= totalNumberOfWebPages; i++ {
@@ -355,46 +346,89 @@ func main() {
 		for _, episode := range episodes {
 			// TODO: maybe use the date above
 			contestants, _ := getContestantInformation(doc, episode.EpisodeID)
-
 			jeopardyRounds, _ := getJeopardyRound(doc, episode.EpisodeID)
-			fmt.Println(jeopardyRounds)
-
 			doubleJeopardyRounds, _ := getDoubleJeopardyRound(doc, episode.EpisodeID)
-			fmt.Println(doubleJeopardyRounds)
 
-			finalJeopardyRounds, _ := getFinalJeopardyRound(doc, episode.EpisodeID)
-			fmt.Println(finalJeopardyRounds)
-
-			// get all of the Game totals
 			boxScoreTotals, _ := getGameTotals(doc, episode.EpisodeID)
-
 			for i := 0; i < len(contestants); i++ {
 				boxScoreTotals[i].City = contestants[i].HomeCity
 				boxScoreTotals[i].State = contestants[i].HomeState
 				boxScoreTotals[i].GameWinner = contestants[i].GameWinner
-
 			}
+			finalJeopardyRounds, _ := getFinalJeopardyRound(doc, episode.EpisodeID)
 
-			date := doc.Find(fmt.Sprintf("table[aria-labelledby='%s-label'] .date", episode.EpisodeID)).Text()
-			title := doc.Find(fmt.Sprintf("table[aria-labelledby='%s-label'] .title", episode.EpisodeID)).Text()
+			episodeDate := doc.Find(fmt.Sprintf("table[aria-labelledby='%s-label'] .date", episode.EpisodeID)).Text()
+			episodeTitle := doc.Find(fmt.Sprintf("table[aria-labelledby='%s-label'] .title", episode.EpisodeID)).Text()
 			episodeNumber := strings.Split(episode.EpisodeID, "-")[1]
 
+			for i := 0; i < len(contestants); i++ {
+				var jeopardyGameBoxScore JeopardyGameBoxScore
+				jeopardyGameBoxScore.EpisodeNumber = episodeNumber
+				jeopardyGameBoxScore.EpisodeTitle = episodeTitle
+				jeopardyGameBoxScore.Date = episodeDate
+				jeopardyGameBoxScore.LastName = contestants[i].LastName
+				jeopardyGameBoxScore.FirstName = contestants[i].FirstName
+				jeopardyGameBoxScore.HomeCity = contestants[i].HomeCity
+				jeopardyGameBoxScore.HomeState = contestants[i].HomeState
+				jeopardyGameBoxScore.GameWinner = contestants[i].GameWinner
+
+				// fill in R1
+				jeopardyGameBoxScore.R1Att = jeopardyRounds[i].Att
+				jeopardyGameBoxScore.R1Buz = jeopardyRounds[i].Buz
+				jeopardyGameBoxScore.R1BuzPercentage = jeopardyRounds[i].BuzPercentage
+				jeopardyGameBoxScore.R1Correct = jeopardyRounds[i].Correct
+				jeopardyGameBoxScore.R1Incorrect = jeopardyRounds[i].Incorrect
+				jeopardyGameBoxScore.R1CorrectPercentage = jeopardyRounds[i].CorrectPercentage
+				jeopardyGameBoxScore.R1DailyDouble = jeopardyRounds[i].DailyDouble
+				jeopardyGameBoxScore.R1Eor = jeopardyRounds[i].EorScore
+
+				// fill in R2
+				jeopardyGameBoxScore.R2Att = doubleJeopardyRounds[i].Att
+				jeopardyGameBoxScore.R2Buz = doubleJeopardyRounds[i].Buz
+				jeopardyGameBoxScore.R2BuzPercentage = doubleJeopardyRounds[i].BuzPercentage
+				jeopardyGameBoxScore.R2Correct = doubleJeopardyRounds[i].Correct
+				jeopardyGameBoxScore.R2Incorrect = doubleJeopardyRounds[i].Incorrect
+				jeopardyGameBoxScore.R2CorrectPercentage = doubleJeopardyRounds[i].CorrectPercentage
+				jeopardyGameBoxScore.R2DailyDouble1 = doubleJeopardyRounds[i].DailyDouble1
+				jeopardyGameBoxScore.R2DailyDouble2 = doubleJeopardyRounds[i].DailyDouble2
+				jeopardyGameBoxScore.R2Eor = doubleJeopardyRounds[i].EorScore
+
+				// fil in r3
+				jeopardyGameBoxScore.StartingFjScore = finalJeopardyRounds[i].StartingFjScore
+				jeopardyGameBoxScore.FjWager = finalJeopardyRounds[i].FjWager
+				jeopardyGameBoxScore.FinalScore = finalJeopardyRounds[i].FinalScore
+
+				// totals
+				jeopardyGameBoxScore.AttTotal = boxScoreTotals[i].TotalAtt
+				jeopardyGameBoxScore.BuzTotal = boxScoreTotals[i].TotalBuz
+				jeopardyGameBoxScore.BuzPercentageTotal = boxScoreTotals[i].TotalBuzPercentage
+				jeopardyGameBoxScore.CorrectTotal = boxScoreTotals[i].TotalCorrect
+				jeopardyGameBoxScore.IncorrectTotal = boxScoreTotals[i].TotalIncorrect
+				jeopardyGameBoxScore.CorrectPercentageTotal = boxScoreTotals[i].CorrectPercentage
+				jeopardyGameBoxScore.DailyDoubleCorrectTotal = boxScoreTotals[i].TotalDailyDoubleCorrect
+				jeopardyGameBoxScore.DailyDoubleIncorrectTotal = boxScoreTotals[i].TotalDailyDoubleIncorrect
+				jeopardyGameBoxScore.DailyDoubleWinningsTotal = boxScoreTotals[i].TotalDailyDoubleWinnings
+				jeopardyGameBoxScore.FinalScoreTotal = boxScoreTotals[i].FinalScore
+
+				allEpisodeJeopardyGameBoxScores = append(allEpisodeJeopardyGameBoxScores, jeopardyGameBoxScore)
+			}
+
+			// for the DB
 			for i := 0; i < len(boxScoreTotals); i++ {
 				// TODO: maybe assign these elsewhere
 				boxScoreTotals[i].EpisodeNumber = episodeNumber
-				boxScoreTotals[i].Date = date
-				boxScoreTotals[i].EpisodeTitle = title
+				boxScoreTotals[i].Date = episodeDate
+				boxScoreTotals[i].EpisodeTitle = episodeTitle
 
 				// add it to the final output for the CSV
 				allEpisodeBoxScoreTotals = append(allEpisodeBoxScoreTotals, boxScoreTotals[i])
 			}
 
-			// get all of the round details
 		}
 	}
 
-	writeGameTotalsOutToCsv(allEpisodeBoxScoreTotals)
-
+	// output box tables
+	writeBoxScoreHistoryToExcel(allEpisodeJeopardyGameBoxScores)
 	writeGameTotalsOutToExcel(allEpisodeBoxScoreTotals)
 
 }
