@@ -1,17 +1,14 @@
 package main
 
 import (
-	"encoding/csv"
 	"fmt"
 	"io"
 	"log"
 	"net/http"
-	"os"
 	"strconv"
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
-	"github.com/xuri/excelize/v2"
 )
 
 func getContestantInformation(doc *goquery.Document, episode string) ([]Contestant, error) {
@@ -59,6 +56,142 @@ func getContestantInformation(doc *goquery.Document, episode string) ([]Contesta
 
 }
 
+func getJeopardyRound(doc *goquery.Document, episode string) ([]JeopardyRound, error) {
+	var jeopardyRound []JeopardyRound
+
+	query := fmt.Sprintf("table[aria-labelledby='%s-label'] .jeopardy-round", episode)
+	doc.Find(query).Each(func(index int, round *goquery.Selection) {
+		// first row is the header, skipping it
+		if index%4 == 0 {
+			return
+		}
+
+		// extract the fields for each column
+		firstName := round.Find(".name-0").Text()
+		lastName := round.Find(".name-1").Text()
+		att, _ := strconv.Atoi(strings.TrimSpace(round.Find("td[data-header='ATT']").Text()))
+		buz, _ := strconv.Atoi(strings.TrimSpace(round.Find("td[data-header='BUZ']").Text()))
+		buzPercent, _ := strconv.Atoi(strings.TrimSuffix(strings.TrimSpace(round.Find("td[data-header='BUZ %']").Text()), "%"))
+
+		corInc := strings.TrimSpace(round.Find("td[data-header='COR/INC']").Text())
+		var correct, incorrect int
+		if len(corInc) > 1 {
+			correctAndIncorrect := strings.Split(corInc, "/")
+			correct, _ = strconv.Atoi(correctAndIncorrect[0])
+			incorrect, _ = strconv.Atoi(correctAndIncorrect[1])
+		}
+
+		correctPercent, _ := strconv.Atoi(strings.TrimSuffix(strings.TrimSpace(round.Find("td[data-header='CORRECT %']").Text()), "%"))
+
+		ddDirty := strings.TrimSpace(round.Find("td[data-header='DD']").Text())
+		ddDirty = strings.Replace(ddDirty, "$", "", -1)
+		ddClean := strings.Replace(ddDirty, ",", "", -1)
+		dd, _ := strconv.Atoi(ddClean)
+
+		eorScoreDirty := strings.TrimSpace(round.Find("td[data-header='EOR SCORE']").Text())
+		eorScoreDirty = strings.Replace(eorScoreDirty, "$", "", -1)
+		eorScoreClean := strings.Replace(eorScoreDirty, ",", "", -1)
+		eorScore, _ := strconv.Atoi(eorScoreClean)
+
+		newRound := JeopardyRound{
+			LastName:          lastName,
+			FirstName:         firstName,
+			Att:               att,
+			Buz:               buz,
+			BuzPercentage:     buzPercent,
+			Correct:           correct,
+			Incorrect:         incorrect,
+			CorrectPercentage: correctPercent,
+			DailyDouble:       dd,
+			EorScore:          eorScore,
+		}
+		index += 1
+		jeopardyRound = append(jeopardyRound, newRound)
+	})
+
+	return jeopardyRound, nil
+}
+
+func getDoubleJeopardyRound(doc *goquery.Document, episode string) ([]DoubleJeopardyRound, error) {
+	var doubleJeopardyRound []DoubleJeopardyRound
+
+	query := fmt.Sprintf("table[aria-labelledby='%s-label'] .double-jeopardy", episode)
+	doc.Find(query).Each(func(index int, round *goquery.Selection) {
+		// first row is the header, skipping it
+		if index%4 == 0 {
+			return
+		}
+
+		// extract the fields for each column
+		firstName := round.Find(".name-0").Text()
+		lastName := round.Find(".name-1").Text()
+		att, _ := strconv.Atoi(strings.TrimSpace(round.Find("td[data-header='ATT']").Text()))
+		buz, _ := strconv.Atoi(strings.TrimSpace(round.Find("td[data-header='BUZ']").Text()))
+		buzPercent, _ := strconv.Atoi(strings.TrimSuffix(strings.TrimSpace(round.Find("td[data-header='BUZ %']").Text()), "%"))
+
+		corInc := strings.TrimSpace(round.Find("td[data-header='COR/INC']").Text())
+		var correct, incorrect int
+		if len(corInc) > 1 {
+			correctAndIncorrect := strings.Split(corInc, "/")
+			correct, _ = strconv.Atoi(correctAndIncorrect[0])
+			incorrect, _ = strconv.Atoi(correctAndIncorrect[1])
+		}
+
+		correctPercent, _ := strconv.Atoi(strings.TrimSuffix(strings.TrimSpace(round.Find("td[data-header='CORRECT %']").Text()), "%"))
+
+		dd1Dirty := strings.TrimSpace(round.Find("td[data-header='DD#1']").Text())
+		fmt.Println("HERE")
+		fmt.Println(dd1Dirty)
+		dd1Dirty = strings.Replace(dd1Dirty, "$", "", -1)
+		dd1Clean := strings.Replace(dd1Dirty, ",", "", -1)
+		dd1, _ := strconv.Atoi(dd1Clean)
+
+		dd2Dirty := strings.TrimSpace(round.Find("td[data-header='DD#2']").Text())
+		dd2Dirty = strings.Replace(dd2Dirty, "$", "", -1)
+		dd2Clean := strings.Replace(dd2Dirty, ",", "", -1)
+		dd2, _ := strconv.Atoi(dd2Clean)
+
+		eorScoreDirty := strings.TrimSpace(round.Find("td[data-header='EOR SCORE']").Text())
+		eorScoreDirty = strings.Replace(eorScoreDirty, "$", "", -1)
+		eorScoreClean := strings.Replace(eorScoreDirty, ",", "", -1)
+		eorScore, _ := strconv.Atoi(eorScoreClean)
+
+		newRound := DoubleJeopardyRound{
+			LastName:          lastName,
+			FirstName:         firstName,
+			Att:               att,
+			Buz:               buz,
+			BuzPercentage:     buzPercent,
+			Correct:           correct,
+			Incorrect:         incorrect,
+			CorrectPercentage: correctPercent,
+			DailyDouble1:      dd1,
+			DailyDouble2:      dd2,
+			EorScore:          eorScore,
+		}
+		index += 1
+		doubleJeopardyRound = append(doubleJeopardyRound, newRound)
+	})
+
+	// for _, jr := range doubleJeopardyRound {
+	// 	fmt.Printf("Contestant: %s, %s\nAttempts: %d\nBuzzes: %d\nBuzz Percentage: %d%%\nCorrect: %d\nIncorrect: %d\nCorrect Percentage: %d%%\nDaily Doubles: %d\nDaily Doubles 2: %d\nEnd of Round Score: %d\n",
+	// 		jr.LastName,
+	// 		jr.FirstName,
+	// 		jr.Att,
+	// 		jr.Buz,
+	// 		jr.BuzPercentage,
+	// 		jr.Correct,
+	// 		jr.Incorrect,
+	// 		jr.CorrectPercentage,
+	// 		jr.DailyDouble1,
+	// 		jr.DailyDouble2,
+	// 		jr.EorScore,
+	// 	)
+	// }
+
+	return doubleJeopardyRound, nil
+}
+
 func getGameTotals(doc *goquery.Document, episode string) ([]JeopardyGameBoxScoreTotal, error) {
 	var boxScoreTotals []JeopardyGameBoxScoreTotal
 
@@ -74,7 +207,7 @@ func getGameTotals(doc *goquery.Document, episode string) ([]JeopardyGameBoxScor
 		lastName := round.Find(".name-1").Text()
 		att, _ := strconv.Atoi(strings.TrimSpace(round.Find("td[data-header='ATT']").Text()))
 		buz, _ := strconv.Atoi(strings.TrimSpace(round.Find("td[data-header='BUZ']").Text()))
-		buzPercent, _ := strconv.ParseFloat(strings.TrimSuffix(strings.TrimSpace(round.Find("td[data-header='BUZ %']").Text()), "%"), 64)
+		buzPercent, _ := strconv.Atoi(strings.TrimSuffix(strings.TrimSpace(round.Find("td[data-header='BUZ %']").Text()), "%"))
 
 		corInc := strings.TrimSpace(round.Find("td[data-header='COR/INC']").Text())
 		var correct, incorrect int
@@ -84,7 +217,7 @@ func getGameTotals(doc *goquery.Document, episode string) ([]JeopardyGameBoxScor
 			incorrect, _ = strconv.Atoi(correctAndIncorrect[1])
 		}
 
-		correctPercent, _ := strconv.ParseFloat(strings.TrimSuffix(strings.TrimSpace(round.Find("td[data-header='CORRECT %']").Text()), "%"), 64)
+		correctPercent, _ := strconv.Atoi(strings.TrimSuffix(strings.TrimSpace(round.Find("td[data-header='CORRECT %']").Text()), "%"))
 
 		dd := strings.TrimSpace(round.Find("td[data-header='DD (COR/INC)']").Text())
 		var ddCorrect, ddIncorrect, ddWinnings int
@@ -139,110 +272,14 @@ func getGameTotals(doc *goquery.Document, episode string) ([]JeopardyGameBoxScor
 	return boxScoreTotals, nil
 }
 
-func writeGameTotalsOutToExcel(boxScoreTotals []JeopardyGameBoxScoreTotal) {
-	f := excelize.NewFile()
-	headers := []string{"EpisodeNumber", "Date", "LastName", "FirstName", "City", "State", "GameWinner", "TotalAtt", "TotalBuz", "TotalBuzPercentage", "TotalCorrect", "TotalIncorrect", "CorrectPercentage", "TotalDdCorrect", "TotalDdIncorrect", "TotalDdWinnings", "FinalScore", "TotalTripleStumpers"}
-	for i, title := range headers {
-		cell, _ := excelize.CoordinatesToCellName(i+1, 1)
-		f.SetCellValue("Sheet1", cell, title)
-	}
-
-	for i, game := range boxScoreTotals {
-		gameWinnerStr := "No"
-		if game.GameWinner {
-			gameWinnerStr = "Yes"
-		}
-		values := []interface{}{
-			game.EpisodeNumber,
-			game.Date,
-			game.LastName,
-			game.FirstName,
-			game.City,
-			game.State,
-			gameWinnerStr,
-			game.TotalAtt,
-			game.TotalBuz,
-			game.TotalBuzPercentage,
-			game.TotalCorrect,
-			game.TotalIncorrect,
-			game.CorrectPercentage,
-			game.TotalDdCorrect,
-			game.TotalDdIncorrect,
-			game.TotalDdWinnings,
-			game.FinalScore,
-			game.TotalTripleStumpers,
-		}
-		for j, value := range values {
-			cell, _ := excelize.CoordinatesToCellName(j+1, i+2) // Rows start from 1, but we have a title row
-			f.SetCellValue("Sheet1", cell, value)
-		}
-	}
-
-	if err := f.SaveAs("JeopardyGameBoxScores.xlsx"); err != nil {
-		fmt.Println(err)
-	}
-
-}
-
-func writeGameTotalsOutToCsv(boxScoreTotals []JeopardyGameBoxScoreTotal) {
-	// write out to CSV
-	file, err := os.Create("jeopardy_scores.csv")
-	if err != nil {
-		panic("Cannot create file")
-	}
-	defer file.Close()
-
-	writer := csv.NewWriter(file)
-	defer writer.Flush()
-
-	// Writing the header
-	header := []string{"EpisodeNumber", "Date", "LastName", "FirstName", "City", "State", "GameWinner", "TotalAtt", "TotalBuz", "TotalBuzPercentage", "TotalCorrect", "TotalIncorrect", "CorrectPercentage", "TotalDdCorrect", "TotalDdIncorrect", "TotalDdWinnings", "FinalScore", "TotalTripleStumpers"}
-	if err := writer.Write(header); err != nil {
-		panic("Cannot write header")
-	}
-
-	// Writing the data
-	for _, game := range boxScoreTotals {
-		gameWinnerStr := "false"
-		if game.GameWinner {
-			gameWinnerStr = "true"
-		}
-		record := []string{
-			game.EpisodeNumber,
-			game.Date,
-			game.LastName,
-			game.FirstName,
-			game.City,
-			game.State,
-			gameWinnerStr,
-			strconv.Itoa(game.TotalAtt),
-			strconv.Itoa(game.TotalBuz),
-			strconv.FormatFloat(game.TotalBuzPercentage, 'f', 2, 64),
-			strconv.Itoa(game.TotalCorrect),
-			strconv.Itoa(game.TotalIncorrect),
-			strconv.FormatFloat(game.CorrectPercentage, 'f', 2, 64),
-			strconv.Itoa(game.TotalDdCorrect),
-			strconv.Itoa(game.TotalDdIncorrect),
-			strconv.Itoa(game.TotalDdWinnings),
-			strconv.Itoa(game.FinalScore),
-			strconv.Itoa(game.TotalTripleStumpers),
-		}
-
-		if err := writer.Write(record); err != nil {
-			panic("Cannot write record")
-		}
-	}
-
-}
-
 func main() {
-	// TODO: loop to next page
-	// https://www.jeopardy.com/track/jeopardata?page=1
 	var allEpisodeBoxScoreTotals []JeopardyGameBoxScoreTotal
+	//var allEpisodeJeopardyGameBoxScores []JeopardyGameBoxScore
 
 	totalNumberOfWebPages := 73
-	for i := 1; i < totalNumberOfWebPages+1; i++ {
+	for i := 0; i <= totalNumberOfWebPages; i++ {
 		fmt.Printf("scraping data from page: %d", i)
+		fmt.Println("...")
 		url := fmt.Sprintf("https://www.jeopardy.com/track/jeopardata?page=%d", i)
 		response, err := http.Get(url)
 		if err != nil {
@@ -285,6 +322,13 @@ func main() {
 			// TODO: maybe use the date above
 			contestants, _ := getContestantInformation(doc, episode.EpisodeID)
 
+			jeopardyRounds, _ := getJeopardyRound(doc, episode.EpisodeID)
+			fmt.Println(jeopardyRounds)
+
+			doubleJeopardyRounds, _ := getDoubleJeopardyRound(doc, episode.EpisodeID)
+			fmt.Println(doubleJeopardyRounds)
+
+			// get all of the Game totals
 			boxScoreTotals, _ := getGameTotals(doc, episode.EpisodeID)
 
 			for i := 0; i < len(contestants); i++ {
@@ -297,38 +341,19 @@ func main() {
 			date := doc.Find(fmt.Sprintf("table[aria-labelledby='%s-label'] .date", episode.EpisodeID)).Text()
 			title := doc.Find(fmt.Sprintf("table[aria-labelledby='%s-label'] .title", episode.EpisodeID)).Text()
 			episodeNumber := strings.Split(episode.EpisodeID, "-")[1]
+
 			for i := 0; i < len(boxScoreTotals); i++ {
 				// TODO: maybe assign these elsewhere
 				boxScoreTotals[i].EpisodeNumber = episodeNumber
 				boxScoreTotals[i].Date = date
 				boxScoreTotals[i].EpisodeTitle = title
-				fmt.Printf("EpisodeNumber: %s\nDate: %s\nLastName: %s\nFirstName: %s\nCity: %s\nState: %s\nGameWinner: %v\nTotalAtt: %d\nTotalBuz: %d\nTotalBuzPercentage: %.2f\nTotalCorrect: %d\nTotalIncorrect: %d\nCorrectPercentage: %.2f\nTotalDdCorrect: %d\nTotalDdIncorrect: %d\nTotalDdWinnings: %d\nFinalScore: %d\nTotalTripleStumpers: %d\n",
-					boxScoreTotals[i].EpisodeNumber,
-					boxScoreTotals[i].Date,
-					boxScoreTotals[i].LastName,
-					boxScoreTotals[i].FirstName,
-					boxScoreTotals[i].City,
-					boxScoreTotals[i].State,
-					boxScoreTotals[i].GameWinner,
-					boxScoreTotals[i].TotalAtt,
-					boxScoreTotals[i].TotalBuz,
-					boxScoreTotals[i].TotalBuzPercentage,
-					boxScoreTotals[i].TotalCorrect,
-					boxScoreTotals[i].TotalIncorrect,
-					boxScoreTotals[i].CorrectPercentage,
-					boxScoreTotals[i].TotalDdCorrect,
-					boxScoreTotals[i].TotalDdIncorrect,
-					boxScoreTotals[i].TotalDdWinnings,
-					boxScoreTotals[i].FinalScore,
-					boxScoreTotals[i].TotalTripleStumpers,
-				)
 
 				// add it to the final output for the CSV
 				allEpisodeBoxScoreTotals = append(allEpisodeBoxScoreTotals, boxScoreTotals[i])
 			}
 
+			// get all of the round details
 		}
-
 	}
 
 	writeGameTotalsOutToCsv(allEpisodeBoxScoreTotals)
