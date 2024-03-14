@@ -173,23 +173,57 @@ func getDoubleJeopardyRound(doc *goquery.Document, episode string) ([]DoubleJeop
 		doubleJeopardyRound = append(doubleJeopardyRound, newRound)
 	})
 
-	// for _, jr := range doubleJeopardyRound {
-	// 	fmt.Printf("Contestant: %s, %s\nAttempts: %d\nBuzzes: %d\nBuzz Percentage: %d%%\nCorrect: %d\nIncorrect: %d\nCorrect Percentage: %d%%\nDaily Doubles: %d\nDaily Doubles 2: %d\nEnd of Round Score: %d\n",
-	// 		jr.LastName,
-	// 		jr.FirstName,
-	// 		jr.Att,
-	// 		jr.Buz,
-	// 		jr.BuzPercentage,
-	// 		jr.Correct,
-	// 		jr.Incorrect,
-	// 		jr.CorrectPercentage,
-	// 		jr.DailyDouble1,
-	// 		jr.DailyDouble2,
-	// 		jr.EorScore,
-	// 	)
-	// }
-
 	return doubleJeopardyRound, nil
+}
+
+func getFinalJeopardyRound(doc *goquery.Document, episode string) ([]FinalJeopardyRound, error) {
+	var finalJeopardyRound []FinalJeopardyRound
+
+	query := fmt.Sprintf("table[aria-labelledby='%s-label'] .final-jeopardy", episode)
+	doc.Find(query).Each(func(index int, round *goquery.Selection) {
+		// first row is the header, skipping it
+		if index%4 == 0 {
+			return
+		}
+
+		// extract the fields for each column
+		firstName := round.Find(".name-0").Text()
+		lastName := round.Find(".name-1").Text()
+
+		startingFjScoreDirty := strings.TrimSpace(round.Find("td[data-header='Starting']").Text())
+		startingFjScoreDirty = strings.Replace(startingFjScoreDirty, "$", "", -1)
+		startingFjScoreClean := strings.Replace(startingFjScoreDirty, ",", "", -1)
+		startingFjScore, _ := strconv.Atoi(startingFjScoreClean)
+
+		fjWagerDirty := strings.TrimSpace(round.Find("td[data-header='FJ! Wager']").Text())
+		fjWagerDirty = strings.Replace(fjWagerDirty, "$", "", -1)
+		fjWagerClean := strings.Replace(fjWagerDirty, ",", "", -1)
+		fjWager, _ := strconv.Atoi(fjWagerClean)
+
+		finalScoreDirty := strings.TrimSpace(round.Find("td[data-header='Final Score']").Text())
+		finalScoreDirty = strings.Replace(finalScoreDirty, "$", "", -1)
+		finalScoreClean := strings.Replace(finalScoreDirty, ",", "", -1)
+		finalScore, _ := strconv.Atoi(finalScoreClean)
+
+		newRound := FinalJeopardyRound{
+			LastName:        lastName,
+			FirstName:       firstName,
+			StartingFjScore: startingFjScore,
+			FjWager:         fjWager,
+			FinalScore:      finalScore,
+		}
+		index += 1
+		finalJeopardyRound = append(finalJeopardyRound, newRound)
+
+		fmt.Printf("Contestant: %s, %s\nStarting Final Jeopardy Score: %d\nFinal Jeopardy Wager: %d\nFinal Score: %d\n",
+			newRound.LastName, newRound.FirstName,
+			newRound.StartingFjScore,
+			newRound.FjWager,
+			newRound.FinalScore,
+		)
+	})
+
+	return finalJeopardyRound, nil
 }
 
 func getGameTotals(doc *goquery.Document, episode string) ([]JeopardyGameBoxScoreTotal, error) {
@@ -327,6 +361,9 @@ func main() {
 
 			doubleJeopardyRounds, _ := getDoubleJeopardyRound(doc, episode.EpisodeID)
 			fmt.Println(doubleJeopardyRounds)
+
+			finalJeopardyRounds, _ := getFinalJeopardyRound(doc, episode.EpisodeID)
+			fmt.Println(finalJeopardyRounds)
 
 			// get all of the Game totals
 			boxScoreTotals, _ := getGameTotals(doc, episode.EpisodeID)

@@ -108,7 +108,7 @@ type DoubleJeopardyRound struct {
 	EorScore          int
 }
 
-type FinalJeopardy struct {
+type FinalJeopardyRound struct {
 	LastName        string
 	FirstName       string
 	StartingFjScore int
