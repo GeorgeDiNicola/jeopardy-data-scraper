@@ -1,0 +1,4 @@
+EpisodeNumber,Date,LastName,FirstName,City,State,GameWinner,TotalAtt,TotalBuz,TotalBuzPercentage,TotalCorrect,TotalIncorrect,CorrectPercentage,TotalDdCorrect,TotalDdIncorrect,TotalDdWinnings,FinalScore,TotalTripleStumpers
+9121,"March 11, 2024",de GUZMAN,LUIGI,ARLINGTON,VIRGINIA,false,43,22,51.00,22,1,96.00,1,0,2600,1,0
+9121,"March 11, 2024",MEYER,TROY,TAMPA,FLORIDA,true,50,17,34.00,19,0,100.00,2,0,8800,0,0
+9121,"March 11, 2024",HENEGAR,BRIAN,LaFOLLETTE,TENNESSEE,false,36,19,53.00,14,5,74.00,0,0,0,5,0

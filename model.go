@@ -6,14 +6,15 @@ import (
 
 type JeopardyGameBoxScore struct {
 	gorm.Model
-	EpisodeNumber          string  `gorm:"type:varchar(100)" json:"episode_number"`
-	Date                   string  `gorm:"type:date" json:"date"`
-	LastName               string  `gorm:"type:varchar(100)" json:"last_name"`
-	FirstName              string  `gorm:"type:varchar(100)" json:"first_name"`
-	City                   string  `gorm:"type:varchar(100)" json:"city"`
-	State                  string  `gorm:"type:varchar(100)" json:"state"`
-	GameChampion           string  `gorm:"type:varchar(1)" json:"game_champion"`   // y or n
-	JeopardyRound          string  `gorm:"type:varchar(50)" json:"jeopardy_round"` // Enum: jeopardy_round, double_jeopardy, final_jeopardy, game_totals
+	EpisodeNumber string `gorm:"type:varchar(100)" json:"episode_number"`
+	EpisodeTitle  string `gorm:"type:varchar(100)" json:"episode_title"`
+	Date          string `gorm:"type:date" json:"date"`
+	LastName      string `gorm:"type:varchar(100)" json:"last_name"`
+	FirstName     string `gorm:"type:varchar(100)" json:"first_name"`
+	City          string `gorm:"type:varchar(100)" json:"city"`
+	State         string `gorm:"type:varchar(100)" json:"state"`
+	GameWinner    bool   `json:"game_winner"` // true or false
+	//JeopardyRound          string  `gorm:"type:varchar(50)" json:"jeopardy_round"` // Enum: jeopardy_round, double_jeopardy, final_jeopardy, game_totals
 	R1Att                  int     `json:"r1_att"`
 	R1Buz                  int     `json:"r1_buz"`
 	R1BuzPercentage        float64 `gorm:"type:decimal(5,2)" json:"r1_buz_percentage"`
@@ -52,12 +53,13 @@ type JeopardyGameBoxScore struct {
 type JeopardyGameBoxScoreTotal struct {
 	gorm.Model
 	EpisodeNumber       string  `gorm:"type:varchar(100)" json:"episode_number"`
+	EpisodeTitle        string  `gorm:"type:varchar(100)" json:"episode_title"`
 	Date                string  `gorm:"type:date" json:"date"`
 	LastName            string  `gorm:"type:varchar(100)" json:"last_name"`
 	FirstName           string  `gorm:"type:varchar(100)" json:"first_name"`
 	City                string  `gorm:"type:varchar(100)" json:"city"`
 	State               string  `gorm:"type:varchar(100)" json:"state"`
-	GameChampion        string  `gorm:"type:varchar(1)" json:"game_champion"` // y or n
+	GameWinner          bool    `json:"game_winner"` // true or false
 	TotalAtt            int     `json:"total_att"`
 	TotalBuz            int     `json:"total_buz"`
 	TotalBuzPercentage  float64 `gorm:"type:decimal(5,2)" json:"total_buz_percentage"`
@@ -69,4 +71,12 @@ type JeopardyGameBoxScoreTotal struct {
 	TotalDdWinnings     int     `gorm:"type:decimal(5,2)" json:"total_dd_winnings"`
 	FinalScore          int     `json:"final_score"`
 	TotalTripleStumpers int     `json:"total_triple_stumpers"`
+}
+
+type Contestant struct {
+	FirstName  string
+	LastName   string
+	HomeCity   string
+	HomeState  string
+	GameWinner bool
 }
