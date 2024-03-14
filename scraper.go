@@ -5,23 +5,98 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
 )
 
-// func getHtmlForForDate(htmlContent, date string) string {
-// 	re := regexp.MustCompile(fmt.Sprintf(`(?s)<div class="date">%s</div>(.*?)<div class="date">`, date))
-// 	matches := re.FindStringSubmatch(htmlContent)
-// 	if len(matches) <= 1 {
-// 		fmt.Printf("No HTML for date %s", date)
-// 		return ""
-// 	}
+func getGameTotals(doc *goquery.Document, episode string) ([]JeopardyGameBoxScoreTotal, error) {
+	var boxScoreTotals []JeopardyGameBoxScoreTotal
 
-// 	return matches[1]
-// }
+	query := fmt.Sprintf("table[aria-labelledby='%s-label'] .game-totals", episode)
+	doc.Find(query).Each(func(index int, round *goquery.Selection) {
+		// first row is the header and skipping it
+		if index%4 == 0 {
+			return
+		}
+
+		firstName := round.Find(".name-0").Text()
+		lastName := round.Find(".name-1").Text()
+		name := firstName + " " + lastName
+
+		att, _ := strconv.Atoi(strings.TrimSpace(round.Find("td[data-header='ATT']").Text()))
+		buz, _ := strconv.Atoi(strings.TrimSpace(round.Find("td[data-header='BUZ']").Text()))
+		buzPercent, _ := strconv.ParseFloat(strings.TrimSuffix(strings.TrimSpace(round.Find("td[data-header='BUZ %']").Text()), "%"), 64)
+
+		corInc := strings.TrimSpace(round.Find("td[data-header='COR/INC']").Text())
+		var correct, incorrect int
+		if len(corInc) > 1 {
+			correctAndIncorrect := strings.Split(corInc, "/")
+			correct, _ = strconv.Atoi(correctAndIncorrect[0])
+			incorrect, _ = strconv.Atoi(correctAndIncorrect[1])
+		}
+
+		correctPercent, _ := strconv.ParseFloat(strings.TrimSuffix(strings.TrimSpace(round.Find("td[data-header='CORRECT %']").Text()), "%"), 64)
+
+		dd := strings.TrimSpace(round.Find("td[data-header='DD (COR/INC)']").Text())
+		var ddCorrect, ddIncorrect, ddWinnings int
+		if len(dd) > 1 {
+			fmt.Println(dd)
+			// Normalize the string by replacing tabs and newlines with a space
+			normalizedData := strings.ReplaceAll(dd, "\n", " ")
+			normalizedData = strings.ReplaceAll(normalizedData, "\t", " ")
+
+			parts := strings.Fields(normalizedData)
+			fractionPart := parts[0]
+			fractionParts := strings.Split(fractionPart, "/")
+			ddCorrect, _ = strconv.Atoi(fractionParts[0])
+			ddIncorrect, _ = strconv.Atoi(fractionParts[1])
+
+			if len(parts) > 1 {
+				monetaryPart := parts[1]
+				monetaryValue := strings.Replace(monetaryPart, "$", "", -1)
+				monetaryValue = strings.Replace(monetaryValue, ",", "", -1)
+				ddWinnings, _ = strconv.Atoi(monetaryValue)
+			}
+
+		}
+
+		finalScore, _ := strconv.Atoi(strings.TrimPrefix(strings.TrimSpace(round.Find("td[data-header='Final Score']").Text()), "$"))
+
+		fmt.Printf("F Contestant: %d, %s\n", index, name)
+		tempTotal := JeopardyGameBoxScoreTotal{
+			EpisodeNumber:       "9126",
+			Date:                "",
+			LastName:            lastName,
+			FirstName:           firstName,
+			City:                "",
+			State:               "",
+			GameChampion:        "",
+			TotalAtt:            att,
+			TotalBuz:            buz,
+			TotalBuzPercentage:  buzPercent,
+			TotalCorrect:        correct,
+			TotalIncorrect:      incorrect,
+			CorrectPercentage:   correctPercent,
+			TotalDdCorrect:      ddCorrect,
+			TotalDdIncorrect:    ddIncorrect,
+			TotalDdWinnings:     ddWinnings,
+			FinalScore:          finalScore,
+			TotalTripleStumpers: 0,
+		}
+		index += 1
+		boxScoreTotals = append(boxScoreTotals, tempTotal)
+	})
+
+	return boxScoreTotals, nil
+
+}
 
 func main() {
+	// TODO: loop to next page
+	// https://www.jeopardy.com/track/jeopardata?page=1
+
 	response, err := http.Get("https://www.jeopardy.com/track/jeopardata")
 	if err != nil {
 		log.Fatal(err)
@@ -35,104 +110,51 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	htmlContent := string(body)
+	htmlPageContent := string(body)
 
-	// HTML content between 2 date tags
-	//htmlForDate := getHtmlForForDate(htmlContent, "March 6, 2024")
-
-	// TODO: only match for the current date!
-	htmlOneGame := htmlContent
-
-	doc, err := goquery.NewDocumentFromReader(strings.NewReader(htmlOneGame))
+	doc, err := goquery.NewDocumentFromReader(strings.NewReader(htmlPageContent))
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// get the game's contestant information
-	doc.Find(".contestant").Each(func(i int, s *goquery.Selection) {
-		lastName := strings.TrimSpace(s.Find(".name-1").Text())
-		firstName := strings.TrimSpace(s.Find(".name-0").Text())
-		home := strings.TrimSpace(s.Find(".home").Text())
-		homeCityState := strings.Split(home, ", ")
-		homeCity, homeState := strings.TrimSpace(homeCityState[0]), strings.TrimSpace(homeCityState[1])
-		fmt.Printf("%s %s from %s, %s", lastName, firstName, homeCity, homeState)
-		fmt.Println()
+	// collect all of the episodes on the webpage
+	var episodes []struct {
+		EpisodeNumber string
+		Date          string
+	}
+
+	// Find each episode and extract its number and date
+	doc.Find(".episode").Each(func(i int, s *goquery.Selection) {
+		episodeNumber, _ := s.Attr("id")
+		date, _ := s.Attr("data-weekday")
+		episodes = append(episodes, struct {
+			EpisodeNumber string
+			Date          string
+		}{EpisodeNumber: episodeNumber, Date: date})
 	})
 
-	// get the Jeopardy Round information for each game
-	doc.Find(".jeopardy-round").Each(func(index int, round *goquery.Selection) {
-		// first row is the header and skipping it
-		if index == 0 {
-			return
-		}
+	boxScoreTotals, _ := getGameTotals(doc, "ep-9121")
 
-		firstName := round.Find(".name-0").Text()
-		lastName := round.Find(".name-1").Text()
-		name := firstName + " " + lastName
-
-		att := strings.TrimSpace(round.Find("td[data-header='ATT']").Text())
-		buz := strings.TrimSpace(round.Find("td[data-header='BUZ']").Text())
-		buzPercent := strings.TrimSpace(round.Find("td[data-header='BUZ %']").Text())
-		corInc := strings.TrimSpace(round.Find("td[data-header='COR/INC']").Text())
-		correctPercent := strings.TrimSpace(round.Find("td[data-header='CORRECT %']").Text())
-		dd := strings.TrimSpace(round.Find("td[data-header='DD']").Text())
-		eorScore := strings.TrimSpace(round.Find("td[data-header='EOR SCORE']").Text())
-
-		fmt.Printf("J Contestant: %d, %s\n", index, name)
-		fmt.Printf("ATT: %s, BUZ: %s, BUZ %%: %s, COR/INC: %s, CORRECT %%: %s, DD: %s, EOR SCORE: %s\n", att, buz, buzPercent, corInc, correctPercent, dd, eorScore)
-		fmt.Println("-----")
-		index += 1
-	})
-
-	// TODO: get the double jeopary round info for each game
-	doc.Find(".jeopardy-round").Each(func(index int, round *goquery.Selection) {
-		// first row is the header and skipping it
-		if index == 0 {
-			return
-		}
-
-		firstName := round.Find(".name-0").Text()
-		lastName := round.Find(".name-1").Text()
-		name := firstName + " " + lastName
-
-		att := strings.TrimSpace(round.Find("td[data-header='ATT']").Text())
-		buz := strings.TrimSpace(round.Find("td[data-header='BUZ']").Text())
-		buzPercent := strings.TrimSpace(round.Find("td[data-header='BUZ %']").Text())
-		corInc := strings.TrimSpace(round.Find("td[data-header='COR/INC']").Text())
-		correctPercent := strings.TrimSpace(round.Find("td[data-header='CORRECT %']").Text())
-		dd := strings.TrimSpace(round.Find("td[data-header='DD']").Text())
-		eorScore := strings.TrimSpace(round.Find("td[data-header='EOR SCORE']").Text())
-
-		fmt.Printf("DD Contestant: %d, %s\n", index, name)
-		fmt.Printf("ATT: %s, BUZ: %s, BUZ %%: %s, COR/INC: %s, CORRECT %%: %s, DD: %s, EOR SCORE: %s\n", att, buz, buzPercent, corInc, correctPercent, dd, eorScore)
-		fmt.Println("-----")
-		index += 1
-	})
-
-	// TODO: get the final jeopary round info for each game
-
-	// get the Game Totals info for each game
-	doc.Find(".game-totals").Each(func(index int, round *goquery.Selection) {
-		// first row is the header and skipping it
-		if index == 0 {
-			return
-		}
-
-		firstName := round.Find(".name-0").Text()
-		lastName := round.Find(".name-1").Text()
-		name := firstName + " " + lastName
-
-		att := strings.TrimSpace(round.Find("td[data-header='ATT']").Text())
-		buz := strings.TrimSpace(round.Find("td[data-header='BUZ']").Text())
-		buzPercent := strings.TrimSpace(round.Find("td[data-header='BUZ %']").Text())
-		corInc := strings.TrimSpace(round.Find("td[data-header='COR/INC']").Text())
-		correctPercent := strings.TrimSpace(round.Find("td[data-header='CORRECT %']").Text())
-		dd := strings.TrimSpace(round.Find("td[data-header='DD (COR/INC)']").Text())
-		finalScore := strings.TrimSpace(round.Find("td[data-header='Final Score']").Text())
-
-		fmt.Printf("F Contestant: %d, %s\n", index, name)
-		fmt.Printf("ATT: %s, BUZ: %s, BUZ %%: %s, COR/INC: %s, CORRECT %%: %s, DD (COR/INC): %s, Final Score: %s\n", att, buz, buzPercent, corInc, correctPercent, dd, finalScore)
-		fmt.Println("-----")
-		index += 1
-	})
+	for _, boxScore := range boxScoreTotals {
+		fmt.Printf("EpisodeNumber: %s\nDate: %s\nLastName: %s\nFirstName: %s\nCity: %s\nState: %s\nGameChampion: %s\nTotalAtt: %d\nTotalBuz: %d\nTotalBuzPercentage: %.2f\nTotalCorrect: %d\nTotalIncorrect: %d\nCorrectPercentage: %.2f\nTotalDdCorrect: %d\nTotalDdIncorrect: %d\nTotalDdWinnings: %d\nFinalScore: %d\nTotalTripleStumpers: %d\n",
+			boxScore.EpisodeNumber,
+			boxScore.Date,
+			boxScore.LastName,
+			boxScore.FirstName,
+			boxScore.City,
+			boxScore.State,
+			boxScore.GameChampion,
+			boxScore.TotalAtt,
+			boxScore.TotalBuz,
+			boxScore.TotalBuzPercentage,
+			boxScore.TotalCorrect,
+			boxScore.TotalIncorrect,
+			boxScore.CorrectPercentage,
+			boxScore.TotalDdCorrect,
+			boxScore.TotalDdIncorrect,
+			boxScore.TotalDdWinnings,
+			boxScore.FinalScore,
+			boxScore.TotalTripleStumpers,
+		)
+	}
 }
