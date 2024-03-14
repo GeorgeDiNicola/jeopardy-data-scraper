@@ -19,9 +19,16 @@ func getContestantInformation(doc *goquery.Document, episode string) ([]Contesta
 	doc.Find(query).Each(func(i int, s *goquery.Selection) {
 		lastName := strings.TrimSpace(s.Find(".name-1").Text())
 		firstName := strings.TrimSpace(s.Find(".name-0").Text())
+
 		home := strings.TrimSpace(s.Find(".home").Text())
-		homeCityState := strings.Split(home, ", ")
-		homeCity, homeState := strings.TrimSpace(homeCityState[0]), strings.TrimSpace(homeCityState[1])
+		var homeCity, homeState string
+		if len(home) > 1 {
+			homeCityState := strings.Split(home, ", ")
+
+			if len(homeCityState) > 1 {
+				homeCity, homeState = strings.TrimSpace(homeCityState[0]), strings.TrimSpace(homeCityState[1])
+			}
+		}
 
 		contestant := Contestant{
 			FirstName: firstName,
@@ -182,86 +189,99 @@ func writeGameTotalsOutToCsv(boxScoreTotals []JeopardyGameBoxScoreTotal) {
 func main() {
 	// TODO: loop to next page
 	// https://www.jeopardy.com/track/jeopardata?page=1
+	var allEpisodeBoxScoreTotals []JeopardyGameBoxScoreTotal
 
-	response, err := http.Get("https://www.jeopardy.com/track/jeopardata")
-	if err != nil {
-		log.Fatal(err)
+	totalNumberOfWebPages := 73
+	for i := 1; i < totalNumberOfWebPages+1; i++ {
+		fmt.Printf("scraping data from page: %d", i)
+		url := fmt.Sprintf("https://www.jeopardy.com/track/jeopardata?page=%d", i)
+		response, err := http.Get(url)
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer response.Body.Close()
+		if response.StatusCode != http.StatusOK {
+			log.Fatalf("Error fetching the page: %s", response.Status)
+		}
+
+		body, err := io.ReadAll(response.Body)
+		if err != nil {
+			log.Fatal(err)
+		}
+		htmlPageContent := string(body)
+
+		doc, err := goquery.NewDocumentFromReader(strings.NewReader(htmlPageContent))
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		// collect all of the episodes on the webpage
+		var episodes []struct {
+			EpisodeID string
+			Date      string
+		}
+
+		// Find each episode and extract its number and date
+		doc.Find(".episode").Each(func(i int, s *goquery.Selection) {
+			episodeID, _ := s.Attr("id")
+			date, _ := s.Attr("data-weekday")
+			episodes = append(episodes, struct {
+				EpisodeID string
+				Date      string
+			}{EpisodeID: episodeID, Date: date})
+		})
+
+		// Get the data for each episode
+		for _, episode := range episodes {
+			// TODO: maybe use the date above
+			contestants, _ := getContestantInformation(doc, episode.EpisodeID)
+
+			boxScoreTotals, _ := getGameTotals(doc, episode.EpisodeID)
+
+			for i := 0; i < len(contestants); i++ {
+				boxScoreTotals[i].City = contestants[i].HomeCity
+				boxScoreTotals[i].State = contestants[i].HomeState
+				boxScoreTotals[i].GameWinner = contestants[i].GameWinner
+
+			}
+
+			date := doc.Find(fmt.Sprintf("table[aria-labelledby='%s-label'] .date", episode.EpisodeID)).Text()
+			title := doc.Find(fmt.Sprintf("table[aria-labelledby='%s-label'] .title", episode.EpisodeID)).Text()
+			episodeNumber := strings.Split(episode.EpisodeID, "-")[1]
+			for i := 0; i < len(boxScoreTotals); i++ {
+				// TODO: maybe assign these elsewhere
+				boxScoreTotals[i].EpisodeNumber = episodeNumber
+				boxScoreTotals[i].Date = date
+				boxScoreTotals[i].EpisodeTitle = title
+				fmt.Printf("EpisodeNumber: %s\nDate: %s\nLastName: %s\nFirstName: %s\nCity: %s\nState: %s\nGameWinner: %v\nTotalAtt: %d\nTotalBuz: %d\nTotalBuzPercentage: %.2f\nTotalCorrect: %d\nTotalIncorrect: %d\nCorrectPercentage: %.2f\nTotalDdCorrect: %d\nTotalDdIncorrect: %d\nTotalDdWinnings: %d\nFinalScore: %d\nTotalTripleStumpers: %d\n",
+					boxScoreTotals[i].EpisodeNumber,
+					boxScoreTotals[i].Date,
+					boxScoreTotals[i].LastName,
+					boxScoreTotals[i].FirstName,
+					boxScoreTotals[i].City,
+					boxScoreTotals[i].State,
+					boxScoreTotals[i].GameWinner,
+					boxScoreTotals[i].TotalAtt,
+					boxScoreTotals[i].TotalBuz,
+					boxScoreTotals[i].TotalBuzPercentage,
+					boxScoreTotals[i].TotalCorrect,
+					boxScoreTotals[i].TotalIncorrect,
+					boxScoreTotals[i].CorrectPercentage,
+					boxScoreTotals[i].TotalDdCorrect,
+					boxScoreTotals[i].TotalDdIncorrect,
+					boxScoreTotals[i].TotalDdWinnings,
+					boxScoreTotals[i].FinalScore,
+					boxScoreTotals[i].TotalTripleStumpers,
+				)
+
+				// add it to the final output for the CSV
+				allEpisodeBoxScoreTotals = append(allEpisodeBoxScoreTotals, boxScoreTotals[i])
+			}
+
+		}
+
 	}
-	defer response.Body.Close()
-	if response.StatusCode != http.StatusOK {
-		log.Fatalf("Error fetching the page: %s", response.Status)
-	}
 
-	body, err := io.ReadAll(response.Body)
-	if err != nil {
-		log.Fatal(err)
-	}
-	htmlPageContent := string(body)
-
-	doc, err := goquery.NewDocumentFromReader(strings.NewReader(htmlPageContent))
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// collect all of the episodes on the webpage
-	var episodes []struct {
-		EpisodeNumber string
-		Date          string
-	}
-
-	// Find each episode and extract its number and date
-	doc.Find(".episode").Each(func(i int, s *goquery.Selection) {
-		episodeNumber, _ := s.Attr("id")
-		date, _ := s.Attr("data-weekday")
-		episodes = append(episodes, struct {
-			EpisodeNumber string
-			Date          string
-		}{EpisodeNumber: episodeNumber, Date: date})
-	})
-
-	episodeId := "ep-9121"
-
-	contestants, _ := getContestantInformation(doc, episodeId)
-
-	boxScoreTotals, _ := getGameTotals(doc, episodeId)
-
-	for i := 0; i < len(contestants); i++ {
-		boxScoreTotals[i].City = contestants[i].HomeCity
-		boxScoreTotals[i].State = contestants[i].HomeState
-		boxScoreTotals[i].GameWinner = contestants[i].GameWinner
-
-	}
-
-	date := doc.Find("table[aria-labelledby='ep-9121-label'] .date").Text()
-	title := doc.Find("table[aria-labelledby='ep-9121-label'] .title").Text()
-	episodeNumber := strings.Split(episodeId, "-")[1]
-	for i := 0; i < len(boxScoreTotals); i++ {
-		// TODO: maybe assign these elsewhere
-		boxScoreTotals[i].EpisodeNumber = episodeNumber
-		boxScoreTotals[i].Date = date
-		boxScoreTotals[i].EpisodeTitle = title
-		// fmt.Printf("EpisodeNumber: %s\nDate: %s\nLastName: %s\nFirstName: %s\nCity: %s\nState: %s\nGameWinner: %v\nTotalAtt: %d\nTotalBuz: %d\nTotalBuzPercentage: %.2f\nTotalCorrect: %d\nTotalIncorrect: %d\nCorrectPercentage: %.2f\nTotalDdCorrect: %d\nTotalDdIncorrect: %d\nTotalDdWinnings: %d\nFinalScore: %d\nTotalTripleStumpers: %d\n",
-		// 	boxScoreTotals[i].EpisodeNumber,
-		// 	boxScoreTotals[i].Date,
-		// 	boxScoreTotals[i].LastName,
-		// 	boxScoreTotals[i].FirstName,
-		// 	boxScoreTotals[i].City,
-		// 	boxScoreTotals[i].State,
-		// 	boxScoreTotals[i].GameWinner,
-		// 	boxScoreTotals[i].TotalAtt,
-		// 	boxScoreTotals[i].TotalBuz,
-		// 	boxScoreTotals[i].TotalBuzPercentage,
-		// 	boxScoreTotals[i].TotalCorrect,
-		// 	boxScoreTotals[i].TotalIncorrect,
-		// 	boxScoreTotals[i].CorrectPercentage,
-		// 	boxScoreTotals[i].TotalDdCorrect,
-		// 	boxScoreTotals[i].TotalDdIncorrect,
-		// 	boxScoreTotals[i].TotalDdWinnings,
-		// 	boxScoreTotals[i].FinalScore,
-		// 	boxScoreTotals[i].TotalTripleStumpers,
-		// )
-	}
-
-	writeGameTotalsOutToCsv(boxScoreTotals)
+	writeGameTotalsOutToCsv(allEpisodeBoxScoreTotals)
 
 }
