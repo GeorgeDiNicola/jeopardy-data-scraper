@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
+	"github.com/xuri/excelize/v2"
 )
 
 func getContestantInformation(doc *goquery.Document, episode string) ([]Contestant, error) {
@@ -107,7 +108,10 @@ func getGameTotals(doc *goquery.Document, episode string) ([]JeopardyGameBoxScor
 
 		}
 
-		finalScore, _ := strconv.Atoi(strings.TrimPrefix(strings.TrimSpace(round.Find("td[data-header='Final Score']").Text()), "$"))
+		finalScoreDirty := strings.TrimSpace(round.Find("td[data-header='Final Score']").Text())
+		finalScoreDirty = strings.Replace(finalScoreDirty, "$", "", -1)
+		finalScoreClean := strings.Replace(finalScoreDirty, ",", "", -1)
+		finalScore, _ := strconv.Atoi(finalScoreClean)
 
 		tempTotal := JeopardyGameBoxScoreTotal{
 			EpisodeNumber:       episode,
@@ -133,6 +137,51 @@ func getGameTotals(doc *goquery.Document, episode string) ([]JeopardyGameBoxScor
 	})
 
 	return boxScoreTotals, nil
+}
+
+func writeGameTotalsOutToExcel(boxScoreTotals []JeopardyGameBoxScoreTotal) {
+	f := excelize.NewFile()
+	headers := []string{"EpisodeNumber", "Date", "LastName", "FirstName", "City", "State", "GameWinner", "TotalAtt", "TotalBuz", "TotalBuzPercentage", "TotalCorrect", "TotalIncorrect", "CorrectPercentage", "TotalDdCorrect", "TotalDdIncorrect", "TotalDdWinnings", "FinalScore", "TotalTripleStumpers"}
+	for i, title := range headers {
+		cell, _ := excelize.CoordinatesToCellName(i+1, 1)
+		f.SetCellValue("Sheet1", cell, title)
+	}
+
+	for i, game := range boxScoreTotals {
+		gameWinnerStr := "No"
+		if game.GameWinner {
+			gameWinnerStr = "Yes"
+		}
+		values := []interface{}{
+			game.EpisodeNumber,
+			game.Date,
+			game.LastName,
+			game.FirstName,
+			game.City,
+			game.State,
+			gameWinnerStr,
+			game.TotalAtt,
+			game.TotalBuz,
+			game.TotalBuzPercentage,
+			game.TotalCorrect,
+			game.TotalIncorrect,
+			game.CorrectPercentage,
+			game.TotalDdCorrect,
+			game.TotalDdIncorrect,
+			game.TotalDdWinnings,
+			game.FinalScore,
+			game.TotalTripleStumpers,
+		}
+		for j, value := range values {
+			cell, _ := excelize.CoordinatesToCellName(j+1, i+2) // Rows start from 1, but we have a title row
+			f.SetCellValue("Sheet1", cell, value)
+		}
+	}
+
+	if err := f.SaveAs("JeopardyGameBoxScores.xlsx"); err != nil {
+		fmt.Println(err)
+	}
+
 }
 
 func writeGameTotalsOutToCsv(boxScoreTotals []JeopardyGameBoxScoreTotal) {
@@ -283,5 +332,7 @@ func main() {
 	}
 
 	writeGameTotalsOutToCsv(allEpisodeBoxScoreTotals)
+
+	writeGameTotalsOutToExcel(allEpisodeBoxScoreTotals)
 
 }
