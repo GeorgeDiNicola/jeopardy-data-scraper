@@ -22,12 +22,13 @@ var StateMap = map[string]string{
 	"OK": "OKLAHOMA", "OR": "OREGON", "PA": "PENNSYLVANIA", "RI": "RHODE ISLAND", "SC": "SOUTH CAROLINA",
 	"SD": "SOUTH DAKOTA", "TN": "TENNESSEE", "TX": "TEXAS", "UT": "UTAH", "VT": "VERMONT",
 	"VA": "VIRGINIA", "WA": "WASHINGTON", "WV": "WEST VIRGINIA", "WI": "WISCONSIN", "WY": "WYOMING",
+	"D.C.": "DC", "d.c": "DC", "D.C": "DC",
 }
 
 func getStateFullName(input string) string {
-	upInput := strings.ToUpper(input) // Convert input to uppercase to match the map keys
+	upInput := strings.ToUpper(input)
 	if fullName, ok := StateMap[upInput]; ok {
-		return fullName // Return the full name if found
+		return fullName
 	} else {
 		return upInput
 	}
@@ -37,8 +38,8 @@ func getContestantInformation(doc *goquery.Document, episode string) ([]Contesta
 	var contestants []Contestant
 	query := fmt.Sprintf("table[aria-labelledby='%s-label'] .contestant", episode)
 	doc.Find(query).Each(func(i int, s *goquery.Selection) {
-		lastName := strings.TrimSpace(s.Find(".name-1").Text())
-		firstName := strings.TrimSpace(s.Find(".name-0").Text())
+		lastName := strings.ToUpper(strings.TrimSpace(s.Find(".name-1").Text()))
+		firstName := strings.ToUpper(strings.TrimSpace(s.Find(".name-0").Text()))
 
 		home := strings.TrimSpace(s.Find(".home").Text())
 		var homeCity, homeState string
@@ -46,7 +47,7 @@ func getContestantInformation(doc *goquery.Document, episode string) ([]Contesta
 			homeCityState := strings.Split(home, ", ")
 
 			if len(homeCityState) > 1 {
-				homeCity, homeState = strings.TrimSpace(homeCityState[0]), strings.TrimSpace(homeCityState[1])
+				homeCity, homeState = strings.ToUpper(strings.TrimSpace(homeCityState[0])), strings.ToUpper(strings.TrimSpace(homeCityState[1]))
 				homeState = getStateFullName(homeState)
 			}
 		}
@@ -63,8 +64,8 @@ func getContestantInformation(doc *goquery.Document, episode string) ([]Contesta
 	var winnerLastName, winnerFirstName string
 	query = fmt.Sprintf("table[aria-labelledby='%s-label'] .winner", episode)
 	doc.Find(query).Each(func(i int, s *goquery.Selection) {
-		winnerLastName = strings.TrimSpace(s.Find(".name-1").Text())
-		winnerFirstName = strings.TrimSpace(s.Find(".name-0").Text())
+		winnerLastName = strings.ToUpper(strings.TrimSpace(s.Find(".name-1").Text()))
+		winnerFirstName = strings.ToUpper(strings.TrimSpace(s.Find(".name-0").Text()))
 	})
 
 	for i := 0; i < len(contestants); i++ {
@@ -90,8 +91,8 @@ func getJeopardyRound(doc *goquery.Document, episode string) ([]JeopardyRound, e
 		}
 
 		// extract the fields for each column
-		firstName := round.Find(".name-0").Text()
-		lastName := round.Find(".name-1").Text()
+		firstName := strings.ToUpper(round.Find(".name-0").Text())
+		lastName := strings.ToUpper(round.Find(".name-1").Text())
 		att, _ := strconv.Atoi(strings.TrimSpace(round.Find("td[data-header='ATT']").Text()))
 		buz, _ := strconv.Atoi(strings.TrimSpace(round.Find("td[data-header='BUZ']").Text()))
 		buzPercent, _ := strconv.Atoi(strings.TrimSuffix(strings.TrimSpace(round.Find("td[data-header='BUZ %']").Text()), "%"))
@@ -146,8 +147,8 @@ func getDoubleJeopardyRound(doc *goquery.Document, episode string) ([]DoubleJeop
 		}
 
 		// extract the fields for each column
-		firstName := round.Find(".name-0").Text()
-		lastName := round.Find(".name-1").Text()
+		firstName := strings.ToUpper(round.Find(".name-0").Text())
+		lastName := strings.ToUpper(round.Find(".name-1").Text())
 		att, _ := strconv.Atoi(strings.TrimSpace(round.Find("td[data-header='ATT']").Text()))
 		buz, _ := strconv.Atoi(strings.TrimSpace(round.Find("td[data-header='BUZ']").Text()))
 		buzPercent, _ := strconv.Atoi(strings.TrimSuffix(strings.TrimSpace(round.Find("td[data-header='BUZ %']").Text()), "%"))
@@ -208,8 +209,8 @@ func getFinalJeopardyRound(doc *goquery.Document, episode string) ([]FinalJeopar
 		}
 
 		// extract the fields for each column
-		firstName := round.Find(".name-0").Text()
-		lastName := round.Find(".name-1").Text()
+		firstName := strings.ToUpper(round.Find(".name-0").Text())
+		lastName := strings.ToUpper(round.Find(".name-1").Text())
 
 		startingFjScoreDirty := strings.TrimSpace(round.Find("td[data-header='Starting']").Text())
 		startingFjScoreDirty = strings.Replace(startingFjScoreDirty, "$", "", -1)
@@ -251,8 +252,8 @@ func getGameTotals(doc *goquery.Document, episode string) ([]JeopardyGameBoxScor
 		}
 
 		// extract the fields for each column
-		firstName := round.Find(".name-0").Text()
-		lastName := round.Find(".name-1").Text()
+		firstName := strings.ToUpper(round.Find(".name-0").Text())
+		lastName := strings.ToUpper(round.Find(".name-1").Text())
 		att, _ := strconv.Atoi(strings.TrimSpace(round.Find("td[data-header='ATT']").Text()))
 		buz, _ := strconv.Atoi(strings.TrimSpace(round.Find("td[data-header='BUZ']").Text()))
 		buzPercent, _ := strconv.Atoi(strings.TrimSuffix(strings.TrimSpace(round.Find("td[data-header='BUZ %']").Text()), "%"))
@@ -419,7 +420,7 @@ func main() {
 				// fil in r3
 				jeopardyGameBoxScore.StartingFjScore = finalJeopardyRounds[i].StartingFjScore
 				jeopardyGameBoxScore.FjWager = finalJeopardyRounds[i].FjWager
-				jeopardyGameBoxScore.FinalScore = finalJeopardyRounds[i].FinalScore
+				jeopardyGameBoxScore.FjFinalScore = finalJeopardyRounds[i].FinalScore
 
 				// totals
 				jeopardyGameBoxScore.AttTotal = boxScoreTotals[i].TotalAtt
@@ -452,6 +453,5 @@ func main() {
 
 	// output box tables
 	writeBoxScoreHistoryToExcel(allEpisodeJeopardyGameBoxScores)
-	writeGameTotalsOutToExcel(allEpisodeBoxScoreTotals)
 
 }

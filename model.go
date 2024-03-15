@@ -34,7 +34,7 @@ type JeopardyGameBoxScore struct {
 	R2Eor                     int `json:"r2_eor"`
 	StartingFjScore           int `json:"starting_fj_score"`
 	FjWager                   int `json:"fj_wager"`
-	FinalScore                int `json:"final_score"`
+	FjFinalScore              int `json:"final_score"`
 	AttTotal                  int `json:"att_total"`
 	BuzTotal                  int `json:"buz_total"`
 	BuzPercentageTotal        int `gorm:"type:decimal(5,2)" json:"buz_percentage_total"`
