@@ -2,7 +2,7 @@ package main
 
 import "strings"
 
-var StateMap = map[string]string{
+var UnitedStatesMap = map[string]string{
 	"AL": "ALABAMA", "AK": "ALASKA", "AZ": "ARIZONA", "AR": "ARKANSAS", "CA": "CALIFORNIA",
 	"CO": "COLORADO", "CT": "CONNECTICUT", "DE": "DELAWARE", "FL": "FLORIDA", "GA": "GEORGIA",
 	"HI": "HAWAII", "ID": "IDAHO", "IL": "ILLINOIS", "IN": "INDIANA", "IA": "IOWA",
@@ -18,7 +18,7 @@ var StateMap = map[string]string{
 
 func getStateFullName(input string) string {
 	upInput := strings.ToUpper(input)
-	if fullName, ok := StateMap[upInput]; ok {
+	if fullName, ok := UnitedStatesMap[upInput]; ok {
 		return fullName
 	} else {
 		return upInput

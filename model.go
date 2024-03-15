@@ -46,30 +46,6 @@ type JeopardyGameBoxScore struct {
 	FinalScoreTotal           int    `json:"final_score_total"`
 	CoryatScore               int    `json:"coryat_score"`
 }
-
-type JeopardyGameBoxScoreTotal struct {
-	gorm.Model
-	EpisodeNumber             string `gorm:"type:varchar(100)" json:"episode_number"`
-	EpisodeTitle              string `gorm:"type:varchar(100)" json:"episode_title"`
-	Date                      string `gorm:"type:date" json:"date"`
-	LastName                  string `gorm:"type:varchar(100)" json:"last_name"`
-	FirstName                 string `gorm:"type:varchar(100)" json:"first_name"`
-	City                      string `gorm:"type:varchar(100)" json:"city"`
-	State                     string `gorm:"type:varchar(100)" json:"state"`
-	GameWinner                bool   `json:"game_winner"` // true or false
-	TotalAtt                  int    `json:"total_att"`
-	TotalBuz                  int    `json:"total_buz"`
-	TotalBuzPercentage        int    `json:"total_buz_percentage"`
-	TotalCorrect              int    `json:"total_correct"`
-	TotalIncorrect            int    `json:"total_incorrect"`
-	CorrectPercentage         int    `json:"correct_percentage"`
-	TotalDailyDoubleCorrect   int    `json:"total_daily_double_correct"`
-	TotalDailyDoubleIncorrect int    `json:"total_daily_double_incorrect"`
-	TotalDailyDoubleWinnings  int    `json:"total_daily_double_winnings"`
-	FinalScore                int    `json:"final_score"`
-	TotalTripleStumpers       int    `json:"total_triple_stumpers"`
-}
-
 type Contestant struct {
 	FirstName  string
 	LastName   string
@@ -111,4 +87,26 @@ type FinalJeopardyRound struct {
 	StartingFjScore int
 	FjWager         int
 	FinalScore      int
+}
+
+type JeopardyGameBoxScoreTotal struct {
+	EpisodeNumber             string `json:"episode_number"`
+	EpisodeTitle              string `json:"episode_title"`
+	Date                      string `json:"date"`
+	LastName                  string `json:"last_name"`
+	FirstName                 string `json:"first_name"`
+	City                      string `json:"city"`
+	State                     string `json:"state"`
+	GameWinner                bool   `json:"game_winner"` // true or false
+	TotalAtt                  int    `json:"total_att"`
+	TotalBuz                  int    `json:"total_buz"`
+	TotalBuzPercentage        int    `json:"total_buz_percentage"`
+	TotalCorrect              int    `json:"total_correct"`
+	TotalIncorrect            int    `json:"total_incorrect"`
+	CorrectPercentage         int    `json:"correct_percentage"`
+	TotalDailyDoubleCorrect   int    `json:"total_daily_double_correct"`
+	TotalDailyDoubleIncorrect int    `json:"total_daily_double_incorrect"`
+	TotalDailyDoubleWinnings  int    `json:"total_daily_double_winnings"`
+	FinalScore                int    `json:"final_score"`
+	TotalTripleStumpers       int    `json:"total_triple_stumpers"`
 }
