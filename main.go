@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
+	_ "github.com/lib/pq" // PostgreSQL driver
 )
 
 func main() {
@@ -39,13 +40,11 @@ func main() {
 			log.Fatal(err)
 		}
 
-		// collect all of the episodes on the webpage
+		// get all of the episodes on the page
 		var episodes []struct {
 			EpisodeID string
 			Date      string
 		}
-
-		// Find each episode and extract its number and date
 		doc.Find(".episode").Each(func(i int, s *goquery.Selection) {
 			episodeID, _ := s.Attr("id")
 			date, _ := s.Attr("data-weekday")
@@ -128,4 +127,6 @@ func main() {
 	}
 
 	writeBoxScoreHistoryToExcel(allEpisodeJeopardyGameBoxScores)
+
+	writeToPostgresDB(allEpisodeJeopardyGameBoxScores)
 }
