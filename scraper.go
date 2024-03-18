@@ -617,15 +617,22 @@ func getNumberOfTripleStumpers(doc *goquery.Document, episode string) (int, erro
 
 	query := fmt.Sprintf("td[headers='%s-notes']", episode)
 	doc.Find(query).Each(func(i int, s *goquery.Selection) {
-		gameNotesText := s.Parents().Find(".game-notes .field__item p").Text()
-		//gameNotesText := s.Find("p").Text()
+		gameNotesText := s.Find("p").Text()
 		if strings.Contains(gameNotesText, "Triple Stumpers:") {
-			re := regexp.MustCompile(`Triple Stumpers:\s*(\d+)(?!\-)`)
+			re := regexp.MustCompile(`Triple Stumpers:\D*(\d+)(-day)?`)
 			matches := re.FindStringSubmatch(gameNotesText)
-			if len(matches) < 2 {
-				log.Printf("no number found following 'Triple Stumpers:'")
+			numberStr := matches[1]
+
+			// Special case: Check if the "-day" pattern is present
+			if len(matches) > 2 && matches[2] == "-day" {
+				dayRe := regexp.MustCompile(`(\d+)-day`)
+				dayMatches := dayRe.FindStringSubmatch(gameNotesText)
+				if len(dayMatches) > 0 {
+					numberStr = dayMatches[1][:1]
+				}
 			}
-			numberOfTripleStumpers, _ = strconv.Atoi(matches[1])
+
+			numberOfTripleStumpers, _ = strconv.Atoi(numberStr)
 		}
 	})
 
