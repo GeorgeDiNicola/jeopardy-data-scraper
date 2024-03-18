@@ -11,7 +11,7 @@ Web scraper for parsing, transforming, and storing data from https://www.jeopard
 - Provide a location to store historic Jeopardy! data in a more data analytical-friendly format than the website
 
 ## System Design
-![Jeopardata System Design](/Users/georgedinicola/jeopardy-data-scraper/docs/Jeopardy-System-Design.png)
+![Jeopardata System Design](docs/Jeopardy-System-Design.png)
 
 ## Algorithm for Bulk Scrape
 1. For each web page
