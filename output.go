@@ -58,7 +58,7 @@ func writeBoxScoreHistoryToExcel(scores []JeopardyGameBoxScore) {
 		"Starting FJ Score", "FJ Wager", "Final Score",
 		"Att Total", "Buz Total", "Buz Percentage Total", "Correct Total", "Incorrect Total", "Correct Percentage Total",
 		"Daily Double Correct Total", "Daily Double Incorrect Total", "Daily Double Winnings Total",
-		"Final Score Total", "Coryat Score",
+		"Final Score Total", "Total Triple Strumpers", "Coryat Score",
 	}
 
 	for i, header := range headers {
@@ -68,17 +68,17 @@ func writeBoxScoreHistoryToExcel(scores []JeopardyGameBoxScore) {
 
 	for i, score := range scores {
 		gameWinnerStr := "No"
-		if score.GameWinner {
+		if score.IsWinner {
 			gameWinnerStr = "Yes"
 		}
 		values := []interface{}{
-			score.EpisodeNumber, score.EpisodeTitle, score.Date, score.LastName, score.FirstName, score.HomeCity, score.HomeState, gameWinnerStr,
-			score.R1Att, score.R1Buz, score.R1BuzPercentage, score.R1Correct, score.R1Incorrect, score.R1CorrectPercentage, score.R1DailyDouble, score.R1Eor,
-			score.R2Att, score.R2Buz, score.R2BuzPercentage, score.R2Correct, score.R2Incorrect, score.R2CorrectPercentage, score.R2DailyDouble1, score.R2DailyDouble2, score.R2Eor,
-			score.StartingFjScore, score.FjWager, score.FjFinalScore,
-			score.AttTotal, score.BuzTotal, score.BuzPercentageTotal, score.CorrectTotal, score.IncorrectTotal, score.CorrectPercentageTotal,
-			score.DailyDoubleCorrectTotal, score.DailyDoubleIncorrectTotal, score.DailyDoubleWinningsTotal,
-			score.FinalScoreTotal, score.CoryatScore,
+			score.EpisodeNumber, score.EpisodeTitle, score.EpisodeDate, score.ContestantLastName, score.ContestantFirstName, score.HomeCity, score.HomeState, gameWinnerStr,
+			score.JeopardyAttempts, score.JeopardyBuzzes, score.JeopardyBuzzPercentage, score.JeopardyCorrectAnswers, score.JeopardyIncorrectAnswers, score.JeopardyCorrectAnswerPercentage, score.JeopardyDailyDoublesFound, score.JeopardyScore,
+			score.DoubleJeopardyAttempts, score.DoubleJeopardyBuzzes, score.DoubleJeopardyBuzzPercentage, score.DoubleJeopardyCorrectAnswers, score.DoubleJeopardyIncorrectAnswers, score.DoubleJeopardyCorrectAnswerPercentage, score.DoubleJeopardyDailyDouble1Found, score.DoubleJeopardyDailyDouble2Found, score.DoubleJeopardyScore,
+			score.FinalJeopardyStartingScore, score.FinalJeopardyWager, score.FinalJeopardyScore,
+			score.TotalAttempts, score.TotalBuzzes, score.TotalBuzzPercentage, score.TotalCorrectAnswers, score.TotalIncorrectAnswers, score.TotalCorrectAnswerPercentage,
+			score.TotalDailyDoublesCorrect, score.TotalDailyDoublesIncorrect, score.TotalDailyDoubleWinnings,
+			score.TotalScore, score.TotalTripleStumpers, score.CoryatScore,
 		}
 
 		for j, value := range values {
