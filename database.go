@@ -45,42 +45,40 @@ func createJeopardyGameBoxScoreTable() error {
 	return nil
 }
 
-func getMostRecentEpisodeDate(gormDB *gorm.DB) (string, error) {
-	var mostRecentBoxScore JeopardyGameBoxScore
-
-	result := gormDB.Order("episode_date DESC").First(&mostRecentBoxScore)
-	if result.Error != nil {
-		panic("failed to connect to database")
-	}
-
-	return mostRecentBoxScore.EpisodeDate, nil
-}
-
-func getMostRecentEpisodeNumber(gormDB *gorm.DB) (string, error) {
-	var mostRecentBoxScore JeopardyGameBoxScore
-
-	result := gormDB.Order("episode_number DESC").First(&mostRecentBoxScore)
-	if result.Error != nil {
-		panic("failed to connect to database")
-	}
-
-	return mostRecentBoxScore.EpisodeNumber, nil
-}
-
-func saveJeopardyGameBoxScore(scores []JeopardyGameBoxScore) {
+func getMostRecentEpisodeNumber() (string, error) {
 	dbHost, dbUsername, dbPassword := os.Getenv("DB_HOST"), os.Getenv("DB_USERNAME"), os.Getenv("DB_PASSWORD")
 	dbName, dbPort, dbTimezone := os.Getenv("DB_NAME"), os.Getenv("DB_PORT"), os.Getenv("DB_TIMEZONE")
 
 	gormDB, err := gorm.Open(postgres.Open(fmt.Sprintf("host=%s port=%s user=%s "+
 		"password=%s dbname=%s sslmode=disable TimeZone=%s", dbHost, dbPort, dbUsername, dbPassword, dbName, dbTimezone)), &gorm.Config{})
 	if err != nil {
-		log.Fatalf("failed to connect database: %v", err)
+		return "", err
+	}
+
+	var mostRecentBoxScore JeopardyGameBoxScore
+
+	result := gormDB.Order("episode_number DESC").First(&mostRecentBoxScore)
+	if result.Error != nil {
+		return "", err
+	}
+
+	return mostRecentBoxScore.EpisodeNumber, nil
+}
+
+func saveJeopardyGameBoxScore(scores []JeopardyGameBoxScore) error {
+	dbHost, dbUsername, dbPassword := os.Getenv("DB_HOST"), os.Getenv("DB_USERNAME"), os.Getenv("DB_PASSWORD")
+	dbName, dbPort, dbTimezone := os.Getenv("DB_NAME"), os.Getenv("DB_PORT"), os.Getenv("DB_TIMEZONE")
+
+	gormDB, err := gorm.Open(postgres.Open(fmt.Sprintf("host=%s port=%s user=%s "+
+		"password=%s dbname=%s sslmode=disable TimeZone=%s", dbHost, dbPort, dbUsername, dbPassword, dbName, dbTimezone)), &gorm.Config{})
+	if err != nil {
+		return err
 	}
 
 	result := gormDB.Create(&scores)
 	if result.Error != nil {
-		log.Printf("failed to insert records: %v", result.Error)
+		return result.Error
 	} else {
-		fmt.Println("Records inserted successfully")
+		return nil
 	}
 }

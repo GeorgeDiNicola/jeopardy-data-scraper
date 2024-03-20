@@ -5,14 +5,11 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"os"
 	"regexp"
 	"strconv"
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
 )
 
 type Scraper interface {
@@ -24,17 +21,7 @@ type Scraper interface {
 func ScrapeIncrementalJeopardata(maxNumPages int) []JeopardyGameBoxScore {
 	var jeopardyGameBoxScores []JeopardyGameBoxScore
 
-	// get the most recent jeopardy game episode and date
-	dbHost, dbUsername, dbPassword := os.Getenv("DB_HOST"), os.Getenv("DB_USERNAME"), os.Getenv("DB_PASSWORD")
-	dbName, dbPort, dbTimezone := os.Getenv("DB_NAME"), os.Getenv("DB_PORT"), os.Getenv("DB_TIMEZONE")
-
-	gormDB, err := gorm.Open(postgres.Open(fmt.Sprintf("host=%s port=%s user=%s "+
-		"password=%s dbname=%s sslmode=disable TimeZone=%s", dbHost, dbPort, dbUsername, dbPassword, dbName, dbTimezone)), &gorm.Config{})
-	if err != nil {
-		log.Fatalf("failed to connect database: %v", err)
-	}
-
-	mostRecentEpisodeNum, err := getMostRecentEpisodeNumber(gormDB)
+	mostRecentEpisodeNum, err := getMostRecentEpisodeNumber()
 	if err != nil {
 		log.Fatal("Error querying for the most recent episode date: ", err)
 	}
@@ -181,15 +168,15 @@ func ScrapeAllJeopardata(totalNumberOfPages int) []JeopardyGameBoxScore {
 		url := fmt.Sprintf("https://www.jeopardy.com/track/jeopardata?page=%d", i)
 		response, err := http.Get(url)
 		if err != nil {
-			log.Fatal(err)
+			log.Printf("Faled to get %s with error: %v", url, err)
 		}
 		defer response.Body.Close()
 		if response.StatusCode != http.StatusOK {
-			log.Fatalf("Error fetching the page: %s", response.Status)
+			log.Printf("Error fetching the page for %s with error: %v", url, err)
 		}
 		body, err := io.ReadAll(response.Body)
 		if err != nil {
-			log.Fatal(err)
+			log.Printf("Error reading the page for %s with error: %v", url, err)
 		}
 
 		htmlPageContent := string(body)
