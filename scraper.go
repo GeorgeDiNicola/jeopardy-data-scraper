@@ -34,16 +34,10 @@ func ScrapeIncrementalJeopardata(maxNumPages int) []JeopardyGameBoxScore {
 		log.Fatalf("failed to connect database: %v", err)
 	}
 
-	mostRecentEpisodeDate, err := getMostRecentEpisodeDate(gormDB)
-	if err != nil {
-		log.Fatal("Error querying for the most recent episode date: ", err)
-	}
-
 	mostRecentEpisodeNum, err := getMostRecentEpisodeNumber(gormDB)
 	if err != nil {
 		log.Fatal("Error querying for the most recent episode date: ", err)
 	}
-	fmt.Println(mostRecentEpisodeDate)
 
 	// start on page 1 and scrape until that most recent date
 	i := 0
@@ -94,8 +88,7 @@ func ScrapeIncrementalJeopardata(maxNumPages int) []JeopardyGameBoxScore {
 			// only scrape up to the last known episode
 			episodeNum := strings.Split(episode.EpisodeID, "-")[1]
 
-			// TODO: the date won't match properly because of the postgresql date type!
-			if mostRecentEpisodeDate == episode.Date || mostRecentEpisodeNum == episodeNum {
+			if mostRecentEpisodeNum == episodeNum {
 				updateFinished = true
 				break
 			}

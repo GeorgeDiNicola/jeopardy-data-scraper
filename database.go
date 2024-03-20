@@ -77,7 +77,6 @@ func saveJeopardyGameBoxScore(scores []JeopardyGameBoxScore) {
 		log.Fatalf("failed to connect database: %v", err)
 	}
 
-	// Create records in the DB
 	result := gormDB.Create(&scores)
 	if result.Error != nil {
 		log.Printf("failed to insert records: %v", result.Error)

@@ -3,7 +3,7 @@ package main
 import "log"
 
 func main() {
-	mode := "FULL"
+	mode := "INCREMENTAL"
 	numberOfPages := 73 // TODO: make this dynamic
 	var jeopardyBoxScores []JeopardyGameBoxScore
 
@@ -39,5 +39,8 @@ func main() {
 		} else {
 			log.Println("No new jeopardata records to extract")
 		}
+	} else {
+		log.Fatalf("invalid mode: %s", mode)
+		return
 	}
 }
