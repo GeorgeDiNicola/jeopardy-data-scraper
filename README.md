@@ -14,6 +14,11 @@ Web scraper for parsing, transforming, and storing data from https://www.jeopard
 ![Jeopardata System Design](docs/Jeopardy-System-Design.png)
 *Application scheduled to execute once per day after the Jeopardata posts to extract the most recent Jeopardy episode data it does not know of, then saves it to the DB.
 
+## Tableau Dashboard Project - Visualization of Jeopardy game data trends over time.
+Project Link: https://public.tableau.com/app/profile/george.dinicola/viz/JeopardyStatistics/JeopardyWinnerStatisticsOverTime
+Design: ![Tableau Dashboard Project Design](docs/Tableau-Dashboard-Design.png)
+
+
 ## Definitions:
 - **EOR** - Score at the end of the round
 - **ATT** - Attempts to buzz in
