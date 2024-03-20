@@ -48,6 +48,11 @@ type JeopardyGameBoxScore struct {
 	CoryatScore                           int    `json:"coryat_score"`
 }
 
+type Episode struct {
+	EpisodeID string
+	Date      string
+}
+
 type Contestant struct {
 	FirstName  string
 	LastName   string

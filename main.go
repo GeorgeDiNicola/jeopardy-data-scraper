@@ -3,7 +3,7 @@ package main
 import "log"
 
 func main() {
-	mode := "FULL"
+	mode := "INCREMENTAL"
 	numberOfPages := 73 // TODO: make this dynamic
 	var jeopardyBoxScores []JeopardyGameBoxScore
 
@@ -21,7 +21,7 @@ func main() {
 			return
 		}
 
-		jeopardyBoxScores = ScrapeAllJeopardata(numberOfPages)
+		jeopardyBoxScores = ScrapeJeopardataFull(numberOfPages)
 
 		if len(jeopardyBoxScores) > 0 {
 			saveJeopardyGameBoxScore(jeopardyBoxScores)
@@ -31,7 +31,7 @@ func main() {
 		}
 
 	} else if mode == "INCREMENTAL" {
-		jeopardyBoxScores = ScrapeIncrementalJeopardata(numberOfPages)
+		jeopardyBoxScores = ScrapeJeopardataIncremental(numberOfPages)
 
 		if len(jeopardyBoxScores) > 0 {
 			saveJeopardyGameBoxScore(jeopardyBoxScores)
