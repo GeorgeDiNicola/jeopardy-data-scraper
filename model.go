@@ -4,7 +4,6 @@ import (
 	"gorm.io/gorm"
 )
 
-// TODO: give all of these full names
 type JeopardyGameBoxScore struct {
 	gorm.Model
 	EpisodeNumber                         string `gorm:"type:varchar(100)" json:"episode_number"`
@@ -60,28 +59,28 @@ type Contestant struct {
 type JeopardyRound struct {
 	LastName          string
 	FirstName         string
-	Att               int
-	Buz               int
-	BuzPercentage     int
+	Attempts          int
+	Buzzes            int
+	BuzzPercentage    int
 	Correct           int
 	Incorrect         int
 	CorrectPercentage int
 	DailyDouble       int
-	EorScore          int
+	EndOfRoundScore   int
 }
 
 type DoubleJeopardyRound struct {
 	LastName          string
 	FirstName         string
-	Att               int
-	Buz               int
-	BuzPercentage     int
+	Attempts          int
+	Buzzes            int
+	BuzzPercentage    int
 	Correct           int
 	Incorrect         int
 	CorrectPercentage int
 	DailyDouble1      int
 	DailyDouble2      int
-	EorScore          int
+	EndOfRoundScore   int
 }
 
 type FinalJeopardyRound struct {
@@ -101,9 +100,9 @@ type JeopardyGameBoxScoreTotal struct {
 	City                      string `json:"city"`
 	State                     string `json:"state"`
 	GameWinner                bool   `json:"game_winner"` // true or false
-	TotalAtt                  int    `json:"total_att"`
-	TotalBuz                  int    `json:"total_buz"`
-	TotalBuzPercentage        int    `json:"total_buz_percentage"`
+	TotalAttempts             int    `json:"total_att"`
+	TotalBuzzes               int    `json:"total_buz"`
+	TotalBuzzPercentage       int    `json:"total_buz_percentage"`
 	TotalCorrect              int    `json:"total_correct"`
 	TotalIncorrect            int    `json:"total_incorrect"`
 	CorrectPercentage         int    `json:"correct_percentage"`
