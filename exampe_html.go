@@ -1,6 +1,6 @@
 package main
 
-var htmlForTests string = `<!DOCTYPE html>
+var HtmlForTests string = `<!DOCTYPE html>
 <html lang="en" dir="ltr" prefix="og: https://ogp.me/ns#">
   <head>
     <meta charset="utf-8" />

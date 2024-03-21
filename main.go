@@ -3,7 +3,7 @@ package main
 import "log"
 
 func main() {
-	mode := "INCREMENTAL"
+	mode := "FULL"
 	numberOfPages := 73 // TODO: make this dynamic
 	var jeopardyBoxScores []JeopardyGameBoxScore
 
