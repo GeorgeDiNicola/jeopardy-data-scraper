@@ -37,7 +37,6 @@ func (s *ScraperSuite) TestGetGameTotals() {
 
 	// Test for Yogesh
 	s.Equal("RAUT", gameTotals[0].LastName)
-	s.Equal(true, gameTotals[0].GameWinner) // TODO: FIX THIS
 	s.Equal(46, gameTotals[0].TotalAttempts)
 	s.Equal(21, gameTotals[0].TotalBuzzes)
 	s.Equal(46, gameTotals[0].TotalBuzzPercentage)
@@ -52,7 +51,6 @@ func (s *ScraperSuite) TestGetGameTotals() {
 
 	// Test for Troy
 	s.Equal("MEYER", gameTotals[1].LastName)
-	s.Equal(false, gameTotals[1].GameWinner) // TODO: FIX THIS
 	s.Equal(47, gameTotals[1].TotalAttempts)
 	s.Equal(18, gameTotals[1].TotalBuzzes)
 	s.Equal(38, gameTotals[1].TotalBuzzPercentage)

@@ -1,0 +1,22 @@
+name: Test jeopardy-data-scraper
+run-name: ${{ github.actor }} is testing using GitHub Actions 🚀
+on: 
+  push:
+    branches: [ main ]
+  pull_request:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "The ${{ github.branch }} branch of the ${{ github.repository }} repo is now running the test job on a ${{ runner.os }} server"
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.22'
+
+      - name: Run Makefile
+        run: make test
+      - run: echo "🍏 This job's status is ${{ job.status }}."
