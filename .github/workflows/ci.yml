@@ -1,18 +1,22 @@
-name: GitHub Actions Demo
-run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
-on: [push]
+name: Test jeopardy-data-scraper
+run-name: ${{ github.actor }} is testing using GitHub Actions 🚀
+on: 
+  push:
+    branches: [ main ]
+  pull_request:
 jobs:
-  Explore-GitHub-Actions:
+  test:
     runs-on: ubuntu-latest
     steps:
-      - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
-      - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
-      - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
-      - name: Check out repository code
+      - run: echo "🐧 This ${{ github.ref }} branch of ${{ github.repository }} repo is now running the test job on a ${{ runner.os }} server"
+      - name: Check out code
         uses: actions/checkout@v4
-      - run: echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
-      - run: echo "🖥️ The workflow is now ready to test your code on the runner."
-      - name: List files in the repository
-        run: |
-          ls ${{ github.workspace }}
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.22'
+
+      - name: Run Makefile
+        run: make test
       - run: echo "🍏 This job's status is ${{ job.status }}."
