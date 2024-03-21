@@ -8,7 +8,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - run: echo "🐧 This ${{ github.ref }} branch of ${{ github.repository }} repo is now running the test job on a ${{ runner.os }} server"
+      - run: echo "The ${{ github.branch }} branch of the ${{ github.repository }} repo is now running the test job on a ${{ runner.os }} server"
       - name: Check out code
         uses: actions/checkout@v4
 
