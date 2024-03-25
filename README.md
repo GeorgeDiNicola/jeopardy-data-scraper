@@ -23,33 +23,47 @@ It also powers this [Tableau Public Dashboard](https://public.tableau.com/app/pr
 - Description: **The historical box scores for each game, player in each Jeopardy game.**
 
 ### Data Dictionary:
-| Field                               | Type    | PostgreSQL Type        | JSON Key                          | Description |
-|-------------------------------------|---------|------------------------|-----------------------------------|-------------|
-| EpisodeNumber                       | string  | `varchar(100)`         | `episode_number`                  | -           |
-| EpisodeTitle                        | string  | `varchar(100)`         | `episode_title`                   | -           |
-| EpisodeDate                         | string  | `date`                 | `episode_date`                    | -           |
-| ContestantLastName                  | string  | `varchar(100)`         | `contestant_last_name`            | -           |
-| ContestantFirstName                 | string  | `varchar(100)`         | `contestant_first_name`           | -           |
-| HomeCity                            | string  | `varchar(100)`         | `home_city`                       | -           |
-| HomeState                           | string  | `varchar(100)`         | `home_state`                      | -           |
-| IsWinner                            | bool    | -                      | `is_winner`                       | -           |
-| JeopardyAttempts                    | int     | -                      | `jeopardy_attempts`               | -           |
-| JeopardyBuzzes                      | int     | -                      | `jeopardy_buzzes`                 | -           |
-| JeopardyBuzzPercentage              | int     | -                      | `jeopardy_buzz_percentage`        | -           |
-| JeopardyCorrectAnswers              | int     | -                      | `jeopardy_correct_answers`        | -           |
-| JeopardyIncorrectAnswers            | int     | -                      | `jeopardy_incorrect_answers`      | -           |
-| JeopardyCorrectAnswerPercentage     | int     | -                      | `jeopardy_correct_answer_percentage` | -     |
-| JeopardyDailyDoubles           | int     | -                      | `jeopardy_daily_doubles`    | -           |
-| JeopardyScore                       | int     | -                      | `jeopardy_score`                  | -           |
-| DoubleJeopardyAttempts              | int     | -                      | `double_jeopardy_attempts`        | -           |
-| DoubleJeopardyBuzzes                | int     | -                      | `double_jeopardy_buzzes`          | -           |
-| DoubleJeopardyBuzzPercentage        | int     | -                      | `double_jeopardy_buzz_percentage` | -           |
-| DoubleJeopardyCorrectAnswers        | int     | -                      | `double_jeopardy_correct_answers` | -           |
-| DoubleJeopardyIncorrectAnswers      | int     | -                      | `double_jeopardy_incorrect_answers` | -       |
-| DoubleJeopardyCorrectAnswerPercentage | int  | -                      | `double_jeopardy_correct_answer_percentage` | - |
-| DoubleJeopardyDailyDouble1     | int     | -                      | `double_jeopardy_daily_double_1` | -  |
-| DoubleJeopardyDailyDouble2     | int     | -                      | `double_jeopardy_daily_double_2` | -  |
-| DoubleJeopardyScore                 | int     | -                      | `double_jeopardy_score`          
+| Field Name                        | Data Type    | Description                                                      |
+|-----------------------------------|--------------|------------------------------------------------------------------|
+| EpisodeNumber                     | varchar(100) | The episode number of the Jeopardy game                          |
+| EpisodeTitle                      | varchar(100) | The title of the Jeopardy episode                                |
+| EpisodeDate                       | date         | The airing date of the Jeopardy episode                          |
+| ContestantLastName                | varchar(100) | The last name of the contestant                                  |
+| ContestantFirstName               | varchar(100) | The first name of the contestant                                 |
+| HomeCity                          | varchar(100) | The home city of the contestant                                  |
+| HomeState                         | varchar(100) | The home state of the contestant                                 |
+| IsWinner                          | boolean      | Whether the contestant won the game                              |
+| RoundOneAttempts                  | integer      | Number of attempts in round one                                  |
+| RoundOneBuzzes                    | integer      | Number of buzzes in round one                                    |
+| RoundOneBuzzPercent               | integer      | Percentage of buzzes in round one                                |
+| RoundOneCorrectAnswers            | integer      | Number of correct answers in round one                           |
+| RoundOneIncorrectAnswers          | integer      | Number of incorrect answers in round one                         |
+| RoundOneCorrectAnswerPercent      | integer      | Percentage of correct answers in round one                       |
+| RoundOneDailyDoubles              | integer      | Number of daily doubles in round one                             |
+| RoundOneScore                     | integer      | Score at the end of round one                                    |
+| RoundTwoAttempts                  | integer      | Number of attempts in round two                                  |
+| RoundTwoBuzzes                    | integer      | Number of buzzes in round two                                    |
+| RoundTwoBuzzPercent               | integer      | Percentage of buzzes in round two                                |
+| RoundTwoCorrectAnswers            | integer      | Number of correct answers in round two                           |
+| RoundTwoIncorrectAnswers          | integer      | Number of incorrect answers in round two                         |
+| RoundTwoCorrectAnswerPercent      | integer      | Percentage of correct answers in round two                       |
+| RoundTwoDailyDouble1              | integer      | First daily double found in round two                            |
+| RoundTwoDailyDouble2              | integer      | Second daily double found in round two                           |
+| RoundTwoScore                     | integer      | Score at the end of round two                                    |
+| FinalJeopardyStartingScore        | integer      | Starting score for Final Jeopardy                                |
+| FinalJeopardyWager                | integer      | Wager for Final Jeopardy                                         |
+| FinalJeopardyScore                | integer      | Score after Final Jeopardy                                       |
+| TotalGameAttempts                 | integer      | Total number of attempts throughout the game                     |
+| TotalGameBuzzes                   | integer      | Total number of buzzes throughout the game                       |
+| TotalGameBuzzPercent              | integer      | Total percentage of buzzes throughout the game                   |
+| TotalGameCorrectAnswers           | integer      | Total number of correct answers throughout the game              |
+| TotalGameIncorrectAnswers         | integer      | Total number of incorrect answers throughout the game            |
+| TotalGameCorrectAnswerPercent     | integer      | Total percentage of correct answers throughout the game          |
+| TotalGameDailyDoublesCorrect      | integer      | Number of daily doubles answered correctly throughout the game   |
+| TotalGameDailyDoublesIncorrect    | integer      | Number of daily doubles answered incorrectly throughout the game |
+| TotalGameDailyDoubleWinnings      | integer      | Total winnings from daily doubles throughout the game            |
+| TotalGameScore                    | integer      | Total score at the end of the game                               |
+| TotalTripleStumpers               | integer      | Total number of triple stumpers throughout the game              |
 
 
 
