@@ -1,16 +1,15 @@
 # jeopardy-data-scraper
 Web scraper for parsing, transforming, and storing data from https://www.jeopardy.com/track/jeopardata.
-
-It also powers this [Tableau Public Dashboard](https://public.tableau.com/app/profile/george.dinicola/viz/JeopardyStatistics).
+It also powers [this Tableau Public Dashboard](https://public.tableau.com/app/profile/george.dinicola/viz/JeopardyStatistics).
 
 ## Usage Modes
-- Full data extract and storage
-- Incremental data extract and storage
+- Full data scrape and store
+- Incremental data scrape and store
 
 ## Design Goals
-- Provide an API and file export mechanisms for data analyst Jeopardy fans to easily explore Jeopardata.
-- Analyze and identify patterns in Jeopardy gameplay over time, such as presenting inflection points in data from influential players like James Holzhauer.
-- Provide a location to store historic Jeopardy! data in a transformed format more suitable for data-driven analysis and applications.
+- Provide an API and file export mechanisms for data analyst Jeopardy fans to easily explore Jeopardata
+- Analyze and identify patterns in Jeopardy gameplay over time, such as presenting inflection points in data from influential players like James Holzhauer
+- Provide a location to store historic Jeopardy! data in a transformed format more suitable for data-driven analysis and applications
 
 ## System Design
 ![Jeopardata System Design](docs/Jeopardy-System-Design.png)
