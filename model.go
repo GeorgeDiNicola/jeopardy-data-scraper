@@ -6,46 +6,45 @@ import (
 
 type JeopardyGameBoxScore struct {
 	gorm.Model
-	EpisodeNumber                         string `gorm:"type:varchar(100)" json:"episode_number"`
-	EpisodeTitle                          string `gorm:"type:varchar(100)" json:"episode_title"`
-	EpisodeDate                           string `gorm:"type:date" json:"episode_date"`
-	ContestantLastName                    string `gorm:"type:varchar(100)" json:"contestant_last_name"`
-	ContestantFirstName                   string `gorm:"type:varchar(100)" json:"contestant_first_name"`
-	HomeCity                              string `gorm:"type:varchar(100)" json:"home_city"`
-	HomeState                             string `gorm:"type:varchar(100)" json:"home_state"`
-	IsWinner                              bool   `json:"is_winner"`
-	JeopardyAttempts                      int    `json:"jeopardy_attempts"`
-	JeopardyBuzzes                        int    `json:"jeopardy_buzzes"`
-	JeopardyBuzzPercentage                int    `json:"jeopardy_buzz_percentage"`
-	JeopardyCorrectAnswers                int    `json:"jeopardy_correct_answers"`
-	JeopardyIncorrectAnswers              int    `json:"jeopardy_incorrect_answers"`
-	JeopardyCorrectAnswerPercentage       int    `json:"jeopardy_correct_answer_percentage"`
-	JeopardyDailyDoublesFound             int    `json:"jeopardy_daily_doubles_found"`
-	JeopardyScore                         int    `json:"jeopardy_score"`
-	DoubleJeopardyAttempts                int    `json:"double_jeopardy_attempts"`
-	DoubleJeopardyBuzzes                  int    `json:"double_jeopardy_buzzes"`
-	DoubleJeopardyBuzzPercentage          int    `json:"double_jeopardy_buzz_percentage"`
-	DoubleJeopardyCorrectAnswers          int    `json:"double_jeopardy_correct_answers"`
-	DoubleJeopardyIncorrectAnswers        int    `json:"double_jeopardy_incorrect_answers"`
-	DoubleJeopardyCorrectAnswerPercentage int    `json:"double_jeopardy_correct_answer_percentage"`
-	DoubleJeopardyDailyDouble1Found       int    `json:"double_jeopardy_daily_double_1_found"`
-	DoubleJeopardyDailyDouble2Found       int    `json:"double_jeopardy_daily_double_2_found"`
-	DoubleJeopardyScore                   int    `json:"double_jeopardy_score"`
-	FinalJeopardyStartingScore            int    `json:"final_jeopardy_starting_score"`
-	FinalJeopardyWager                    int    `json:"final_jeopardy_wager"`
-	FinalJeopardyScore                    int    `json:"final_jeopardy_score"`
-	TotalAttempts                         int    `json:"total_attempts"`
-	TotalBuzzes                           int    `json:"total_buzzes"`
-	TotalBuzzPercentage                   int    `json:"total_buzz_percentage"`
-	TotalCorrectAnswers                   int    `json:"total_correct_answers"`
-	TotalIncorrectAnswers                 int    `json:"total_incorrect_answers"`
-	TotalCorrectAnswerPercentage          int    `json:"total_correct_answer_percentage"`
-	TotalDailyDoublesCorrect              int    `json:"total_daily_doubles_correct"`
-	TotalDailyDoublesIncorrect            int    `json:"total_daily_doubles_incorrect"`
-	TotalDailyDoubleWinnings              int    `json:"total_daily_double_winnings"`
-	TotalScore                            int    `json:"total_score"`
-	TotalTripleStumpers                   int    `json:"total_triple_stumpers"`
-	CoryatScore                           int    `json:"coryat_score"`
+	EpisodeNumber                  string `gorm:"type:varchar(100)" json:"episode_number"`
+	EpisodeTitle                   string `gorm:"type:varchar(100)" json:"episode_title"`
+	EpisodeDate                    string `gorm:"type:date" json:"episode_date"`
+	ContestantLastName             string `gorm:"type:varchar(100)" json:"contestant_last_name"`
+	ContestantFirstName            string `gorm:"type:varchar(100)" json:"contestant_first_name"`
+	HomeCity                       string `gorm:"type:varchar(100)" json:"home_city"`
+	HomeState                      string `gorm:"type:varchar(100)" json:"home_state"`
+	IsWinner                       bool   `json:"is_winner"`
+	RoundOneAttempts               int    `json:"round_one_attempts"`
+	RoundOneBuzzes                 int    `json:"round_one_buzzes"`
+	RoundOneBuzzPercent            int    `json:"round_one_buzz_percent"`
+	RoundOneCorrectAnswers         int    `json:"round_one_correct_answers"`
+	RoundOneIncorrectAnswers       int    `json:"round_one_incorrect_answers"`
+	RoundOneCorrectAnswerPercent   int    `json:"round_one_correct_answer_percent"`
+	RoundOneDailyDoubles           int    `json:"round_one_daily_doubles"`
+	RoundOneScore                  int    `json:"round_one_score"`
+	RoundTwoAttempts               int    `json:"round_two_attempts"`
+	RoundTwoBuzzes                 int    `json:"round_two_buzzes"`
+	RoundTwoBuzzPercent            int    `json:"round_two_buzz_percent"`
+	RoundTwoCorrectAnswers         int    `json:"round_two_correct_answers"`
+	RoundTwoIncorrectAnswers       int    `json:"round_two_incorrect_answers"`
+	RoundTwoCorrectAnswerPercent   int    `json:"round_two_correct_answer_percent"`
+	RoundTwoDailyDouble1           int    `json:"round_two_daily_double_1"`
+	RoundTwoDailyDouble2           int    `json:"round_two_daily_double_2"`
+	RoundTwoScore                  int    `json:"round_two_score"`
+	FinalJeopardyStartingScore     int    `json:"final_jeopardy_starting_score"`
+	FinalJeopardyWager             int    `json:"final_jeopardy_wager"`
+	FinalJeopardyScore             int    `json:"final_jeopardy_score"`
+	TotalGameAttempts              int    `json:"total_game_attempts"`
+	TotalGameBuzzes                int    `json:"total_game_buzzes"`
+	TotalGameBuzzPercent           int    `json:"total_game_buzz_percent"`
+	TotalGameCorrectAnswers        int    `json:"total_game_correct_answers"`
+	TotalGameIncorrectAnswers      int    `json:"total_game_incorrect_answers"`
+	TotalGameCorrectAnswerPercent  int    `json:"total_game_correct_answer_percent"`
+	TotalGameDailyDoublesCorrect   int    `json:"total_daily_doubles_correct"`
+	TotalGameDailyDoublesIncorrect int    `json:"total_game_daily_doubles_incorrect"`
+	TotalGameDailyDoubleWinnings   int    `json:"total_game_daily_double_winnings"`
+	TotalGameScore                 int    `json:"total_game_score"`
+	TotalTripleStumpers            int    `json:"total_triple_stumpers"`
 }
 
 type Episode struct {

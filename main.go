@@ -3,8 +3,9 @@ package main
 import "log"
 
 func main() {
-	mode := "FULL"
+	mode := "FULL"      // TODO: make this an input to the main function
 	numberOfPages := 73 // TODO: make this dynamic
+
 	var jeopardyBoxScores []JeopardyGameBoxScore
 
 	if mode == "FULL" {
@@ -21,21 +22,21 @@ func main() {
 			return
 		}
 
-		jeopardyBoxScores = ScrapeJeopardataFull(numberOfPages)
+		jeopardyBoxScores = ScrapeGameDataFull(numberOfPages)
 
 		if len(jeopardyBoxScores) > 0 {
 			saveJeopardyGameBoxScore(jeopardyBoxScores)
-			writeBoxScoreHistoryToExcel(jeopardyBoxScores)
+			writeBoxScoreHistoryToExcel("jeopardata_box_scores_sample.xlsx", jeopardyBoxScores)
 		} else {
 			log.Println("No new jeopardata records to extract")
 		}
 
 	} else if mode == "INCREMENTAL" {
-		jeopardyBoxScores = ScrapeJeopardataIncremental(numberOfPages)
+		jeopardyBoxScores = ScrapeGameDataIncremental(numberOfPages)
 
 		if len(jeopardyBoxScores) > 0 {
 			saveJeopardyGameBoxScore(jeopardyBoxScores)
-			writeBoxScoreHistoryToExcel(jeopardyBoxScores)
+			writeBoxScoreHistoryToExcel("jeopardata_box_scores_sample.xlsx", jeopardyBoxScores)
 		} else {
 			log.Println("No new jeopardata records to extract")
 		}

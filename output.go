@@ -7,18 +7,24 @@ import (
 	"github.com/xuri/excelize/v2"
 )
 
-func writeBoxScoreHistoryToExcel(scores []JeopardyGameBoxScore) {
+func writeBoxScoreHistoryToExcel(fileName string, scores []JeopardyGameBoxScore) {
 	f := excelize.NewFile()
 	sheetName := "Sheet1"
 
 	headers := []string{
-		"Episode Number", "Episode Title", "Date", "Last Name", "First Name", "Home City", "Home State", "Game Winner",
-		"R1 Att", "R1 Buz", "R1 Buz Percentage", "R1 Correct", "R1 Incorrect", "R1 Correct Percentage", "R1 Daily Double", "R1 Eor",
-		"R2 Att", "R2 Buz", "R2 Buz Percentage", "R2 Correct", "R2 Incorrect", "R2 Correct Percentage", "R2 Daily Double 1", "R2 Daily Double 2", "R2 Eor",
-		"Starting FJ Score", "FJ Wager", "Final Score",
-		"Att Total", "Buz Total", "Buz Percentage Total", "Correct Total", "Incorrect Total", "Correct Percentage Total",
-		"Daily Double Correct Total", "Daily Double Incorrect Total", "Daily Double Winnings Total",
-		"Final Score Total", "Total Triple Stumpers", "Coryat Score",
+		"Episode Number", "Episode Title", "Episode Date",
+		"Contestant Last Name", "Contestant First Name", "Home City", "Home State", "Is Winner",
+		"Round One Attempts", "Round One Buzzes", "Round One Buzz Percentage",
+		"Round One Correct Answers", "Round One Incorrect Answers", "Round One Correct Answer Percentage",
+		"Round One Daily Doubles", "Round One Score",
+		"Round Two Attempts", "Round Two Buzzes", "Round Two Buzz Percentage",
+		"Round Two Correct Answers", "Round Two Incorrect Answers", "Round Two Correct Answer Percentage",
+		"Round Two Daily Double 1", "Round Two Daily Double 2", "Round Two Score",
+		"Final Jeopardy Starting Score", "Final Jeopardy Wager", "Final Jeopardy Score",
+		"Total Game Attempts", "Total Game Buzzes", "Total Game Buzz Percentage",
+		"Total Game Correct Answers", "Total Game Incorrect Answers", "Total Game Correct Answer Percentage",
+		"Total Game Daily Doubles Correct", "Total Game Daily Doubles Incorrect", "Total Game Daily Double Winnings",
+		"Total Game Score", "Total Triple Stumpers",
 	}
 
 	for i, header := range headers {
@@ -33,12 +39,12 @@ func writeBoxScoreHistoryToExcel(scores []JeopardyGameBoxScore) {
 		}
 		values := []interface{}{
 			score.EpisodeNumber, score.EpisodeTitle, score.EpisodeDate, score.ContestantLastName, score.ContestantFirstName, score.HomeCity, score.HomeState, gameWinnerStr,
-			score.JeopardyAttempts, score.JeopardyBuzzes, score.JeopardyBuzzPercentage, score.JeopardyCorrectAnswers, score.JeopardyIncorrectAnswers, score.JeopardyCorrectAnswerPercentage, score.JeopardyDailyDoublesFound, score.JeopardyScore,
-			score.DoubleJeopardyAttempts, score.DoubleJeopardyBuzzes, score.DoubleJeopardyBuzzPercentage, score.DoubleJeopardyCorrectAnswers, score.DoubleJeopardyIncorrectAnswers, score.DoubleJeopardyCorrectAnswerPercentage, score.DoubleJeopardyDailyDouble1Found, score.DoubleJeopardyDailyDouble2Found, score.DoubleJeopardyScore,
+			score.RoundOneAttempts, score.RoundOneBuzzes, score.RoundOneBuzzPercent, score.RoundOneCorrectAnswers, score.RoundOneIncorrectAnswers, score.RoundOneCorrectAnswerPercent, score.RoundOneDailyDoubles, score.RoundOneScore,
+			score.RoundTwoAttempts, score.RoundTwoBuzzes, score.RoundTwoBuzzPercent, score.RoundTwoCorrectAnswers, score.RoundTwoIncorrectAnswers, score.RoundTwoCorrectAnswerPercent, score.RoundTwoDailyDouble1, score.RoundTwoDailyDouble2, score.RoundTwoScore,
 			score.FinalJeopardyStartingScore, score.FinalJeopardyWager, score.FinalJeopardyScore,
-			score.TotalAttempts, score.TotalBuzzes, score.TotalBuzzPercentage, score.TotalCorrectAnswers, score.TotalIncorrectAnswers, score.TotalCorrectAnswerPercentage,
-			score.TotalDailyDoublesCorrect, score.TotalDailyDoublesIncorrect, score.TotalDailyDoubleWinnings,
-			score.TotalScore, score.TotalTripleStumpers, score.CoryatScore,
+			score.TotalGameAttempts, score.TotalGameBuzzes, score.TotalGameBuzzPercent, score.RoundTwoCorrectAnswers, score.TotalGameIncorrectAnswers, score.TotalGameCorrectAnswerPercent,
+			score.TotalGameDailyDoublesCorrect, score.TotalGameDailyDoublesIncorrect, score.TotalGameDailyDoubleWinnings,
+			score.TotalGameScore, score.TotalTripleStumpers,
 		}
 
 		for j, value := range values {
@@ -47,7 +53,7 @@ func writeBoxScoreHistoryToExcel(scores []JeopardyGameBoxScore) {
 		}
 	}
 
-	if err := f.SaveAs("all_jeopardy_box_scores.xlsx"); err != nil {
+	if err := f.SaveAs(fileName); err != nil {
 		log.Printf("Failed to save the Excel file: %v", err)
 	}
 }

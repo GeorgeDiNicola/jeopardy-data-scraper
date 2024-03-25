@@ -14,7 +14,7 @@ import (
 )
 
 // gets all of the Jeopardata from the Jeopardy.com website that the DB does not know about
-func ScrapeJeopardataIncremental(maxNumPages int) []JeopardyGameBoxScore {
+func ScrapeGameDataIncremental(maxNumPages int) []JeopardyGameBoxScore {
 	var jeopardyGameBoxScores []JeopardyGameBoxScore
 
 	mostRecentEpisodeNum, err := getMostRecentEpisodeNumber()
@@ -72,7 +72,7 @@ func ScrapeJeopardataIncremental(maxNumPages int) []JeopardyGameBoxScore {
 }
 
 // gets all of the Jeopardata from the Jeopardy.com website
-func ScrapeJeopardataFull(totalNumberOfPages int) []JeopardyGameBoxScore {
+func ScrapeGameDataFull(totalNumberOfPages int) []JeopardyGameBoxScore {
 	var allEpisodeJeopardyGameBoxScores []JeopardyGameBoxScore
 
 	for i := 0; i <= totalNumberOfPages; i++ {
@@ -176,25 +176,25 @@ func getJeopardyGameData(doc *goquery.Document, episode Episode) []JeopardyGameB
 		jeopardyGameBoxScore.IsWinner = contestants[i].GameWinner
 
 		// Round 1
-		jeopardyGameBoxScore.JeopardyAttempts = jeopardyRounds[i].Attempts
-		jeopardyGameBoxScore.JeopardyBuzzes = jeopardyRounds[i].Buzzes
-		jeopardyGameBoxScore.JeopardyBuzzPercentage = jeopardyRounds[i].BuzzPercentage
-		jeopardyGameBoxScore.JeopardyCorrectAnswers = jeopardyRounds[i].Correct
-		jeopardyGameBoxScore.JeopardyIncorrectAnswers = jeopardyRounds[i].Incorrect
-		jeopardyGameBoxScore.JeopardyCorrectAnswerPercentage = jeopardyRounds[i].CorrectPercentage
-		jeopardyGameBoxScore.JeopardyDailyDoublesFound = jeopardyRounds[i].DailyDouble
-		jeopardyGameBoxScore.JeopardyScore = jeopardyRounds[i].EndOfRoundScore
+		jeopardyGameBoxScore.RoundOneAttempts = jeopardyRounds[i].Attempts
+		jeopardyGameBoxScore.RoundOneBuzzes = jeopardyRounds[i].Buzzes
+		jeopardyGameBoxScore.RoundOneBuzzPercent = jeopardyRounds[i].BuzzPercentage
+		jeopardyGameBoxScore.RoundOneCorrectAnswers = jeopardyRounds[i].Correct
+		jeopardyGameBoxScore.RoundOneIncorrectAnswers = jeopardyRounds[i].Incorrect
+		jeopardyGameBoxScore.RoundOneCorrectAnswerPercent = jeopardyRounds[i].CorrectPercentage
+		jeopardyGameBoxScore.RoundOneDailyDoubles = jeopardyRounds[i].DailyDouble
+		jeopardyGameBoxScore.RoundOneScore = jeopardyRounds[i].EndOfRoundScore
 
 		// Double Jeopardy
-		jeopardyGameBoxScore.DoubleJeopardyAttempts = doubleJeopardyRounds[i].Attempts
-		jeopardyGameBoxScore.DoubleJeopardyBuzzes = doubleJeopardyRounds[i].Buzzes
-		jeopardyGameBoxScore.DoubleJeopardyBuzzPercentage = doubleJeopardyRounds[i].BuzzPercentage
-		jeopardyGameBoxScore.DoubleJeopardyCorrectAnswers = doubleJeopardyRounds[i].Correct
-		jeopardyGameBoxScore.JeopardyIncorrectAnswers = doubleJeopardyRounds[i].Incorrect
-		jeopardyGameBoxScore.DoubleJeopardyCorrectAnswerPercentage = doubleJeopardyRounds[i].CorrectPercentage
-		jeopardyGameBoxScore.DoubleJeopardyDailyDouble1Found = doubleJeopardyRounds[i].DailyDouble1
-		jeopardyGameBoxScore.DoubleJeopardyDailyDouble2Found = doubleJeopardyRounds[i].DailyDouble2
-		jeopardyGameBoxScore.DoubleJeopardyScore = doubleJeopardyRounds[i].EndOfRoundScore
+		jeopardyGameBoxScore.RoundTwoAttempts = doubleJeopardyRounds[i].Attempts
+		jeopardyGameBoxScore.RoundTwoBuzzes = doubleJeopardyRounds[i].Buzzes
+		jeopardyGameBoxScore.RoundTwoBuzzPercent = doubleJeopardyRounds[i].BuzzPercentage
+		jeopardyGameBoxScore.RoundTwoCorrectAnswers = doubleJeopardyRounds[i].Correct
+		jeopardyGameBoxScore.RoundTwoIncorrectAnswers = doubleJeopardyRounds[i].Incorrect
+		jeopardyGameBoxScore.RoundTwoCorrectAnswerPercent = doubleJeopardyRounds[i].CorrectPercentage
+		jeopardyGameBoxScore.RoundTwoDailyDouble1 = doubleJeopardyRounds[i].DailyDouble1
+		jeopardyGameBoxScore.RoundTwoDailyDouble2 = doubleJeopardyRounds[i].DailyDouble2
+		jeopardyGameBoxScore.RoundTwoScore = doubleJeopardyRounds[i].EndOfRoundScore
 
 		// Final Jeopardy
 		jeopardyGameBoxScore.FinalJeopardyStartingScore = finalJeopardyRounds[i].StartingFjScore
@@ -202,16 +202,16 @@ func getJeopardyGameData(doc *goquery.Document, episode Episode) []JeopardyGameB
 		jeopardyGameBoxScore.FinalJeopardyScore = finalJeopardyRounds[i].FinalScore
 
 		// Round Totals
-		jeopardyGameBoxScore.TotalAttempts = boxScoreTotals[i].TotalAttempts
-		jeopardyGameBoxScore.TotalBuzzes = boxScoreTotals[i].TotalBuzzes
-		jeopardyGameBoxScore.TotalBuzzPercentage = boxScoreTotals[i].TotalBuzzPercentage
-		jeopardyGameBoxScore.TotalCorrectAnswers = boxScoreTotals[i].TotalCorrect
-		jeopardyGameBoxScore.TotalIncorrectAnswers = boxScoreTotals[i].TotalIncorrect
-		jeopardyGameBoxScore.TotalCorrectAnswerPercentage = boxScoreTotals[i].CorrectPercentage
-		jeopardyGameBoxScore.TotalDailyDoublesCorrect = boxScoreTotals[i].TotalDailyDoubleCorrect
-		jeopardyGameBoxScore.TotalDailyDoublesIncorrect = boxScoreTotals[i].TotalDailyDoubleIncorrect
-		jeopardyGameBoxScore.TotalDailyDoubleWinnings = boxScoreTotals[i].TotalDailyDoubleWinnings
-		jeopardyGameBoxScore.TotalScore = boxScoreTotals[i].FinalScore
+		jeopardyGameBoxScore.TotalGameAttempts = boxScoreTotals[i].TotalAttempts
+		jeopardyGameBoxScore.TotalGameBuzzes = boxScoreTotals[i].TotalBuzzes
+		jeopardyGameBoxScore.TotalGameBuzzPercent = boxScoreTotals[i].TotalBuzzPercentage
+		jeopardyGameBoxScore.TotalGameCorrectAnswers = boxScoreTotals[i].TotalCorrect
+		jeopardyGameBoxScore.TotalGameIncorrectAnswers = boxScoreTotals[i].TotalIncorrect
+		jeopardyGameBoxScore.TotalGameCorrectAnswerPercent = boxScoreTotals[i].CorrectPercentage
+		jeopardyGameBoxScore.TotalGameDailyDoublesCorrect = boxScoreTotals[i].TotalDailyDoubleCorrect
+		jeopardyGameBoxScore.TotalGameDailyDoublesIncorrect = boxScoreTotals[i].TotalDailyDoubleIncorrect
+		jeopardyGameBoxScore.TotalGameDailyDoubleWinnings = boxScoreTotals[i].TotalDailyDoubleWinnings
+		jeopardyGameBoxScore.TotalGameScore = boxScoreTotals[i].FinalScore
 
 		// Triple Stumpers
 		jeopardyGameBoxScore.TotalTripleStumpers = numberOfTripleStumpers

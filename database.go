@@ -34,12 +34,12 @@ func createJeopardyGameBoxScoreTable() error {
 	gormDB, err := gorm.Open(postgres.Open(fmt.Sprintf("host=%s port=%s user=%s "+
 		"password=%s dbname=%s sslmode=disable TimeZone=%s", dbHost, dbPort, dbUsername, dbPassword, dbName, dbTimezone)), &gorm.Config{})
 	if err != nil {
-		log.Fatalf("failed to connect database: %v", err)
+		log.Printf("failed to connect database: %v", err)
 	}
 
 	err = gormDB.AutoMigrate(&JeopardyGameBoxScore{})
 	if err != nil {
-		log.Fatalf("failed to migrate: %v", err)
+		log.Printf("failed to migrate: %v", err)
 	}
 
 	return nil
