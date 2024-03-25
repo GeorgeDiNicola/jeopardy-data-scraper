@@ -1,16 +1,19 @@
-package main
+package db
 
 import (
 	"database/sql"
 	"fmt"
+	"georgedinicola/jeopardy-data-scraper/internal/model"
 	"log"
 	"os"
+
+	_ "github.com/lib/pq"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
-func createDatabaseIfDoesNotExist() error {
+func CreateDatabaseIfDoesNotExist() error {
 	dbHost, dbUsername, dbPassword := os.Getenv("DB_HOST"), os.Getenv("DB_USERNAME"), os.Getenv("DB_PASSWORD")
 	dbName, dbPort, dbTimezone := os.Getenv("DB_NAME"), os.Getenv("DB_PORT"), os.Getenv("DB_TIMEZONE")
 
@@ -27,7 +30,7 @@ func createDatabaseIfDoesNotExist() error {
 	return nil
 }
 
-func createJeopardyGameBoxScoreTable() error {
+func CreateJeopardyGameBoxScoreTable() error {
 	dbHost, dbUsername, dbPassword := os.Getenv("DB_HOST"), os.Getenv("DB_USERNAME"), os.Getenv("DB_PASSWORD")
 	dbName, dbPort, dbTimezone := os.Getenv("DB_NAME"), os.Getenv("DB_PORT"), os.Getenv("DB_TIMEZONE")
 
@@ -37,7 +40,7 @@ func createJeopardyGameBoxScoreTable() error {
 		log.Printf("failed to connect database: %v", err)
 	}
 
-	err = gormDB.AutoMigrate(&JeopardyGameBoxScore{})
+	err = gormDB.AutoMigrate(&model.JeopardyGameBoxScore{})
 	if err != nil {
 		log.Printf("failed to migrate: %v", err)
 	}
@@ -45,7 +48,7 @@ func createJeopardyGameBoxScoreTable() error {
 	return nil
 }
 
-func getMostRecentEpisodeNumber() (string, error) {
+func GetMostRecentEpisodeNumber() (string, error) {
 	dbHost, dbUsername, dbPassword := os.Getenv("DB_HOST"), os.Getenv("DB_USERNAME"), os.Getenv("DB_PASSWORD")
 	dbName, dbPort, dbTimezone := os.Getenv("DB_NAME"), os.Getenv("DB_PORT"), os.Getenv("DB_TIMEZONE")
 
@@ -55,7 +58,7 @@ func getMostRecentEpisodeNumber() (string, error) {
 		return "", err
 	}
 
-	var mostRecentBoxScore JeopardyGameBoxScore
+	var mostRecentBoxScore model.JeopardyGameBoxScore
 
 	result := gormDB.Order("episode_number DESC").First(&mostRecentBoxScore)
 	if result.Error != nil {
@@ -65,7 +68,7 @@ func getMostRecentEpisodeNumber() (string, error) {
 	return mostRecentBoxScore.EpisodeNumber, nil
 }
 
-func saveJeopardyGameBoxScore(scores []JeopardyGameBoxScore) error {
+func SaveJeopardyGameBoxScore(scores []model.JeopardyGameBoxScore) error {
 	dbHost, dbUsername, dbPassword := os.Getenv("DB_HOST"), os.Getenv("DB_USERNAME"), os.Getenv("DB_PASSWORD")
 	dbName, dbPort, dbTimezone := os.Getenv("DB_NAME"), os.Getenv("DB_PORT"), os.Getenv("DB_TIMEZONE")
 

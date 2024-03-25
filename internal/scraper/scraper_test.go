@@ -1,8 +1,10 @@
-package main
+package scraper
 
 import (
 	"strings"
 	"testing"
+
+	"georgedinicola/jeopardy-data-scraper/testdata"
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/stretchr/testify/suite"
@@ -16,7 +18,7 @@ type ScraperSuite struct {
 }
 
 func (suite *ScraperSuite) SetupTest() {
-	htmlNode, err := html.Parse(strings.NewReader(HtmlForTests))
+	htmlNode, err := html.Parse(strings.NewReader(testdata.HtmlForTests))
 	if err != nil {
 		panic(err)
 	}

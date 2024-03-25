@@ -1,4 +1,4 @@
-package main
+package testdata
 
 var HtmlForTests string = `<!DOCTYPE html>
 <html lang="en" dir="ltr" prefix="og: https://ogp.me/ns#">

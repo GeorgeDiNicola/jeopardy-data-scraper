@@ -1,4 +1,4 @@
-package main
+package scraper
 
 import (
 	"fmt"
@@ -10,14 +10,19 @@ import (
 	"strings"
 	"time"
 
+	"georgedinicola/jeopardy-data-scraper/internal/config"
+	"georgedinicola/jeopardy-data-scraper/internal/db"
+	"georgedinicola/jeopardy-data-scraper/internal/model"
+	"georgedinicola/jeopardy-data-scraper/internal/util"
+
 	"github.com/PuerkitoBio/goquery"
 )
 
 // gets all of the Jeopardata from the Jeopardy.com website that the DB does not know about
-func ScrapeGameDataIncremental(maxNumPages int) []JeopardyGameBoxScore {
-	var jeopardyGameBoxScores []JeopardyGameBoxScore
+func ScrapeGameDataIncremental(maxNumPages int) []model.JeopardyGameBoxScore {
+	var jeopardyGameBoxScores []model.JeopardyGameBoxScore
 
-	mostRecentEpisodeNum, err := getMostRecentEpisodeNumber()
+	mostRecentEpisodeNum, err := db.GetMostRecentEpisodeNumber()
 	if err != nil {
 		log.Fatal("Error querying for the most recent episode date: ", err)
 	}
@@ -36,11 +41,11 @@ func ScrapeGameDataIncremental(maxNumPages int) []JeopardyGameBoxScore {
 		}
 
 		// get all of the episodes on the page
-		var episodes []Episode
+		var episodes []model.Episode
 		doc.Find(".episode").Each(func(i int, s *goquery.Selection) {
 			episodeID, _ := s.Attr("id")
 			date, _ := s.Attr("data-weekday")
-			episodes = append(episodes, Episode{
+			episodes = append(episodes, model.Episode{
 				EpisodeID: episodeID,
 				Date:      date,
 			})
@@ -62,7 +67,7 @@ func ScrapeGameDataIncremental(maxNumPages int) []JeopardyGameBoxScore {
 		}
 
 		// delay to avoid rate limiting from Jepoardy.com
-		time.Sleep(DelayBetweenRequests * time.Second)
+		time.Sleep(config.DelayBetweenRequests * time.Second)
 
 		currentPageNumber++ // next page
 	}
@@ -72,8 +77,8 @@ func ScrapeGameDataIncremental(maxNumPages int) []JeopardyGameBoxScore {
 }
 
 // gets all of the Jeopardata from the Jeopardy.com website
-func ScrapeGameDataFull(totalNumberOfPages int) []JeopardyGameBoxScore {
-	var allEpisodeJeopardyGameBoxScores []JeopardyGameBoxScore
+func ScrapeGameDataFull(totalNumberOfPages int) []model.JeopardyGameBoxScore {
+	var allEpisodeJeopardyGameBoxScores []model.JeopardyGameBoxScore
 
 	for i := 0; i <= totalNumberOfPages; i++ {
 
@@ -104,7 +109,7 @@ func ScrapeGameDataFull(totalNumberOfPages int) []JeopardyGameBoxScore {
 		}
 
 		// delay to avoid rate limiting from Jepoardy.com
-		time.Sleep(DelayBetweenRequests * time.Second)
+		time.Sleep(config.DelayBetweenRequests * time.Second)
 	}
 
 	return allEpisodeJeopardyGameBoxScores
@@ -139,9 +144,9 @@ func getJeopardataWebPage(currentPageNumber int) (*goquery.Document, error) {
 	return doc, nil
 }
 
-func getJeopardyGameData(doc *goquery.Document, episode Episode) []JeopardyGameBoxScore {
+func getJeopardyGameData(doc *goquery.Document, episode model.Episode) []model.JeopardyGameBoxScore {
 	// the 3 box scores for the Jeopardy game
-	var jeopardyGameBoxScores []JeopardyGameBoxScore
+	var jeopardyGameBoxScores []model.JeopardyGameBoxScore
 
 	contestants, _ := getContestantInformation(doc, episode.EpisodeID)
 	jeopardyRounds, _ := getJeopardyRound(doc, episode.EpisodeID)
@@ -157,13 +162,18 @@ func getJeopardyGameData(doc *goquery.Document, episode Episode) []JeopardyGameB
 	finalJeopardyRounds, _ := getFinalJeopardyRound(doc, episode.EpisodeID)
 	numberOfTripleStumpers, _ := getNumberOfTripleStumpers(doc, episode.EpisodeID)
 
-	episodeDate := doc.Find(fmt.Sprintf("table[aria-labelledby='%s-label'] .date", episode.EpisodeID)).Text()
+	parsedEpisodeDate := doc.Find(fmt.Sprintf("table[aria-labelledby='%s-label'] .date", episode.EpisodeID)).Text()
+	episodeDate, err := time.Parse(config.DateFormat, parsedEpisodeDate)
+	if err != nil {
+		log.Printf("Error parsing date: %v", err)
+	}
+
 	episodeTitle := doc.Find(fmt.Sprintf("table[aria-labelledby='%s-label'] .title", episode.EpisodeID)).Text()
 	episodeNumber := strings.Split(episode.EpisodeID, "-")[1]
 
 	// fill in all of the collected data
 	for i := 0; i < len(contestants); i++ {
-		var jeopardyGameBoxScore JeopardyGameBoxScore
+		var jeopardyGameBoxScore model.JeopardyGameBoxScore
 
 		// Jeopardy Metadata
 		jeopardyGameBoxScore.EpisodeNumber = episodeNumber
@@ -222,8 +232,8 @@ func getJeopardyGameData(doc *goquery.Document, episode Episode) []JeopardyGameB
 	return jeopardyGameBoxScores
 }
 
-func getContestantInformation(doc *goquery.Document, episode string) ([]Contestant, error) {
-	var contestants []Contestant
+func getContestantInformation(doc *goquery.Document, episode string) ([]model.Contestant, error) {
+	var contestants []model.Contestant
 
 	query := fmt.Sprintf("table[aria-labelledby='%s-label'] .contestant", episode)
 	doc.Find(query).Each(func(i int, s *goquery.Selection) {
@@ -237,11 +247,11 @@ func getContestantInformation(doc *goquery.Document, episode string) ([]Contesta
 
 			if len(homeCityState) > 1 {
 				homeCity, homeState = strings.ToUpper(strings.TrimSpace(homeCityState[0])), strings.ToUpper(strings.TrimSpace(homeCityState[1]))
-				homeState = getStateFullName(homeState)
+				homeState = util.GetStateFullName(homeState)
 			}
 		}
 
-		contestant := Contestant{
+		contestant := model.Contestant{
 			FirstName: firstName,
 			LastName:  lastName,
 			HomeCity:  homeCity,
@@ -268,8 +278,8 @@ func getContestantInformation(doc *goquery.Document, episode string) ([]Contesta
 	return contestants, nil
 }
 
-func getJeopardyRound(doc *goquery.Document, episode string) ([]JeopardyRound, error) {
-	var jeopardyRound []JeopardyRound
+func getJeopardyRound(doc *goquery.Document, episode string) ([]model.JeopardyRound, error) {
+	var jeopardyRound []model.JeopardyRound
 
 	query := fmt.Sprintf("table[aria-labelledby='%s-label'] .jeopardy-round", episode)
 	doc.Find(query).Each(func(index int, round *goquery.Selection) {
@@ -305,7 +315,7 @@ func getJeopardyRound(doc *goquery.Document, episode string) ([]JeopardyRound, e
 		eorScoreClean := strings.Replace(eorScoreDirty, ",", "", -1)
 		eorScore, _ := strconv.Atoi(eorScoreClean)
 
-		newRound := JeopardyRound{
+		newRound := model.JeopardyRound{
 			LastName:          lastName,
 			FirstName:         firstName,
 			Attempts:          att,
@@ -324,8 +334,8 @@ func getJeopardyRound(doc *goquery.Document, episode string) ([]JeopardyRound, e
 	return jeopardyRound, nil
 }
 
-func getDoubleJeopardyRound(doc *goquery.Document, episode string) ([]DoubleJeopardyRound, error) {
-	var doubleJeopardyRound []DoubleJeopardyRound
+func getDoubleJeopardyRound(doc *goquery.Document, episode string) ([]model.DoubleJeopardyRound, error) {
+	var doubleJeopardyRound []model.DoubleJeopardyRound
 
 	query := fmt.Sprintf("table[aria-labelledby='%s-label'] .double-jeopardy", episode)
 	doc.Find(query).Each(func(index int, round *goquery.Selection) {
@@ -366,7 +376,7 @@ func getDoubleJeopardyRound(doc *goquery.Document, episode string) ([]DoubleJeop
 		eorScoreClean := strings.Replace(eorScoreDirty, ",", "", -1)
 		eorScore, _ := strconv.Atoi(eorScoreClean)
 
-		newRound := DoubleJeopardyRound{
+		newRound := model.DoubleJeopardyRound{
 			LastName:          lastName,
 			FirstName:         firstName,
 			Attempts:          att,
@@ -386,8 +396,8 @@ func getDoubleJeopardyRound(doc *goquery.Document, episode string) ([]DoubleJeop
 	return doubleJeopardyRound, nil
 }
 
-func getFinalJeopardyRound(doc *goquery.Document, episode string) ([]FinalJeopardyRound, error) {
-	var finalJeopardyRound []FinalJeopardyRound
+func getFinalJeopardyRound(doc *goquery.Document, episode string) ([]model.FinalJeopardyRound, error) {
+	var finalJeopardyRound []model.FinalJeopardyRound
 
 	query := fmt.Sprintf("table[aria-labelledby='%s-label'] .final-jeopardy", episode)
 	doc.Find(query).Each(func(index int, round *goquery.Selection) {
@@ -415,7 +425,7 @@ func getFinalJeopardyRound(doc *goquery.Document, episode string) ([]FinalJeopar
 		finalScoreClean := strings.Replace(finalScoreDirty, ",", "", -1)
 		finalScore, _ := strconv.Atoi(finalScoreClean)
 
-		newRound := FinalJeopardyRound{
+		newRound := model.FinalJeopardyRound{
 			LastName:        lastName,
 			FirstName:       firstName,
 			StartingFjScore: startingFjScore,
@@ -429,8 +439,8 @@ func getFinalJeopardyRound(doc *goquery.Document, episode string) ([]FinalJeopar
 	return finalJeopardyRound, nil
 }
 
-func getGameTotals(doc *goquery.Document, episode string) ([]JeopardyGameBoxScoreTotal, error) {
-	var boxScoreTotals []JeopardyGameBoxScoreTotal
+func getGameTotals(doc *goquery.Document, episode string) ([]model.JeopardyGameBoxScoreTotal, error) {
+	var boxScoreTotals []model.JeopardyGameBoxScoreTotal
 
 	query := fmt.Sprintf("table[aria-labelledby='%s-label'] .game-totals", episode)
 	doc.Find(query).Each(func(index int, round *goquery.Selection) {
@@ -483,7 +493,7 @@ func getGameTotals(doc *goquery.Document, episode string) ([]JeopardyGameBoxScor
 		finalScoreClean := strings.Replace(finalScoreDirty, ",", "", -1)
 		finalScore, _ := strconv.Atoi(finalScoreClean)
 
-		tempTotal := JeopardyGameBoxScoreTotal{
+		tempTotal := model.JeopardyGameBoxScoreTotal{
 			EpisodeNumber:             episode,
 			LastName:                  lastName,
 			FirstName:                 firstName,

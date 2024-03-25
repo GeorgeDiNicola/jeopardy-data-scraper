@@ -1,3 +1,6 @@
+run:
+	go run cmd/jeopardy-data-scraper/main.go
+
 test:
 	go test -cover -v ./...
 
