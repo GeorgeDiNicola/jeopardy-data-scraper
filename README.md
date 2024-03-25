@@ -1,5 +1,5 @@
 # jeopardy-data-scraper
-Web scraper for parsing, transforming, and storing data from https://www.jeopardy.com/track/jeopardata.
+Web scraper for parsing, transforming, and storing data from [Jeopary's Jeopardata webpage](https://www.jeopardy.com/track/jeopardata).
 It also powers [this Tableau Public Dashboard](https://public.tableau.com/app/profile/george.dinicola/viz/JeopardyStatistics).
 
 ## Usage Modes

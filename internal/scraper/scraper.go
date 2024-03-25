@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"georgedinicola/jeopardy-data-scraper/internal/config"
-	"georgedinicola/jeopardy-data-scraper/internal/db"
 	"georgedinicola/jeopardy-data-scraper/internal/model"
 	"georgedinicola/jeopardy-data-scraper/internal/util"
 
@@ -19,13 +18,8 @@ import (
 )
 
 // gets all of the Jeopardata from the Jeopardy.com website that the DB does not know about
-func ScrapeGameDataIncremental(maxNumPages int) []model.JeopardyGameBoxScore {
+func ScrapeGameDataIncremental(mostRecentEpisodeNum string, maxNumPages int) []model.JeopardyGameBoxScore {
 	var jeopardyGameBoxScores []model.JeopardyGameBoxScore
-
-	mostRecentEpisodeNum, err := db.GetMostRecentEpisodeNumber()
-	if err != nil {
-		log.Fatal("Error querying for the most recent episode date: ", err)
-	}
 
 	// start on page 1 and scrape until that most recent date
 	currentPageNumber := 0
