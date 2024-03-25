@@ -50,16 +50,16 @@ type JeopardyGameBoxScore struct {
 }
 
 type Episode struct {
-	EpisodeID string
-	Date      string
+	EpisodeNumber string `gorm:"type:varchar(100)" json:"episode_number"`
+	EpisodeDate   string `gorm:"type:date" json:"episode_date"`
 }
 
 type Contestant struct {
-	FirstName  string
-	LastName   string
-	HomeCity   string
-	HomeState  string
-	GameWinner bool
+	ContestantFirstName string `gorm:"type:varchar(100)" json:"contestant_first_name"`
+	ContestantLastName  string `gorm:"type:varchar(100)" json:"contestant_last_name"`
+	HomeCity            string `gorm:"type:varchar(100)" json:"home_city"`
+	HomeState           string `gorm:"type:varchar(100)" json:"home_state"`
+	GameWinner          bool   `json:"is_winner"`
 }
 
 type JeopardyRound struct {

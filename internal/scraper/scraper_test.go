@@ -71,22 +71,22 @@ func (s *ScraperSuite) TestGetContestantInformation() {
 	s.NoError(err)
 
 	// Test for Yogesh Raut
-	s.Equal("RAUT", contestantInfo[0].LastName)
-	s.Equal("YOGESH", contestantInfo[0].FirstName)
+	s.Equal("RAUT", contestantInfo[0].ContestantLastName)
+	s.Equal("YOGESH", contestantInfo[0].ContestantFirstName)
 	s.Equal("VANCOUVER", contestantInfo[0].HomeCity)
 	s.Equal("WASHINGTON", contestantInfo[0].HomeState)
 	s.Equal(true, contestantInfo[0].GameWinner)
 
 	// Test for Troy Meyer
-	s.Equal("MEYER", contestantInfo[1].LastName)
-	s.Equal("TROY", contestantInfo[1].FirstName)
+	s.Equal("MEYER", contestantInfo[1].ContestantLastName)
+	s.Equal("TROY", contestantInfo[1].ContestantFirstName)
 	s.Equal("TAMPA", contestantInfo[1].HomeCity)
 	s.Equal("FLORIDA", contestantInfo[1].HomeState)
 	s.Equal(false, contestantInfo[1].GameWinner)
 
 	// Test for Ben Chan
-	s.Equal("CHAN", contestantInfo[2].LastName)
-	s.Equal("BEN", contestantInfo[2].FirstName)
+	s.Equal("CHAN", contestantInfo[2].ContestantLastName)
+	s.Equal("BEN", contestantInfo[2].ContestantFirstName)
 	s.Equal("GREEN BAY", contestantInfo[2].HomeCity)
 	s.Equal("WISCONSIN", contestantInfo[2].HomeState)
 	s.Equal(false, contestantInfo[2].GameWinner)

@@ -40,15 +40,15 @@ func ScrapeGameDataIncremental(mostRecentEpisodeNum string, maxNumPages int) []m
 			episodeID, _ := s.Attr("id")
 			date, _ := s.Attr("data-weekday")
 			episodes = append(episodes, model.Episode{
-				EpisodeID: episodeID,
-				Date:      date,
+				EpisodeNumber: episodeID,
+				EpisodeDate:   date,
 			})
 		})
 
 		// Collect all relevant data for each episode
 		for _, episode := range episodes {
 			// only scrape up to the last known episode
-			episodeNum := strings.Split(episode.EpisodeID, "-")[1]
+			episodeNum := strings.Split(episode.EpisodeNumber, "-")[1]
 
 			if mostRecentEpisodeNum == episodeNum {
 				updateFinished = true
@@ -82,17 +82,11 @@ func ScrapeGameDataFull(totalNumberOfPages int) []model.JeopardyGameBoxScore {
 		}
 
 		// get all of the episodes on the page
-		var episodes []struct {
-			EpisodeID string
-			Date      string
-		}
+		var episodes []model.Episode
 		doc.Find(".episode").Each(func(i int, s *goquery.Selection) {
 			episodeID, _ := s.Attr("id")
 			date, _ := s.Attr("data-weekday")
-			episodes = append(episodes, struct {
-				EpisodeID string
-				Date      string
-			}{EpisodeID: episodeID, Date: date})
+			episodes = append(episodes, model.Episode{episodeID, date})
 		})
 
 		// Collect all relevant data for each episode
@@ -142,28 +136,28 @@ func getJeopardyGameData(doc *goquery.Document, episode model.Episode) []model.J
 	// the 3 box scores for the Jeopardy game
 	var jeopardyGameBoxScores []model.JeopardyGameBoxScore
 
-	contestants, _ := getContestantInformation(doc, episode.EpisodeID)
-	jeopardyRounds, _ := getJeopardyRound(doc, episode.EpisodeID)
-	doubleJeopardyRounds, _ := getDoubleJeopardyRound(doc, episode.EpisodeID)
+	contestants, _ := getContestantInformation(doc, episode.EpisodeNumber)
+	jeopardyRounds, _ := getJeopardyRound(doc, episode.EpisodeNumber)
+	doubleJeopardyRounds, _ := getDoubleJeopardyRound(doc, episode.EpisodeNumber)
 
-	boxScoreTotals, _ := getGameTotals(doc, episode.EpisodeID)
+	boxScoreTotals, _ := getGameTotals(doc, episode.EpisodeNumber)
 	for i := 0; i < len(contestants); i++ {
 		boxScoreTotals[i].City = contestants[i].HomeCity
 		boxScoreTotals[i].State = contestants[i].HomeState
 		boxScoreTotals[i].GameWinner = contestants[i].GameWinner
 	}
 
-	finalJeopardyRounds, _ := getFinalJeopardyRound(doc, episode.EpisodeID)
-	numberOfTripleStumpers, _ := getNumberOfTripleStumpers(doc, episode.EpisodeID)
+	finalJeopardyRounds, _ := getFinalJeopardyRound(doc, episode.EpisodeNumber)
+	numberOfTripleStumpers, _ := getNumberOfTripleStumpers(doc, episode.EpisodeNumber)
 
-	parsedEpisodeDate := doc.Find(fmt.Sprintf("table[aria-labelledby='%s-label'] .date", episode.EpisodeID)).Text()
+	parsedEpisodeDate := doc.Find(fmt.Sprintf("table[aria-labelledby='%s-label'] .date", episode.EpisodeNumber)).Text()
 	episodeDate, err := time.Parse(config.DateFormat, parsedEpisodeDate)
 	if err != nil {
 		log.Printf("Error parsing date: %v", err)
 	}
 
-	episodeTitle := doc.Find(fmt.Sprintf("table[aria-labelledby='%s-label'] .title", episode.EpisodeID)).Text()
-	episodeNumber := strings.Split(episode.EpisodeID, "-")[1]
+	episodeTitle := doc.Find(fmt.Sprintf("table[aria-labelledby='%s-label'] .title", episode.EpisodeNumber)).Text()
+	episodeNumber := strings.Split(episode.EpisodeNumber, "-")[1]
 
 	// fill in all of the collected data
 	for i := 0; i < len(contestants); i++ {
@@ -173,8 +167,8 @@ func getJeopardyGameData(doc *goquery.Document, episode model.Episode) []model.J
 		jeopardyGameBoxScore.EpisodeNumber = episodeNumber
 		jeopardyGameBoxScore.EpisodeTitle = episodeTitle
 		jeopardyGameBoxScore.EpisodeDate = episodeDate
-		jeopardyGameBoxScore.ContestantLastName = contestants[i].LastName
-		jeopardyGameBoxScore.ContestantFirstName = contestants[i].FirstName
+		jeopardyGameBoxScore.ContestantLastName = contestants[i].ContestantLastName
+		jeopardyGameBoxScore.ContestantFirstName = contestants[i].ContestantFirstName
 		jeopardyGameBoxScore.HomeCity = contestants[i].HomeCity
 		jeopardyGameBoxScore.HomeState = contestants[i].HomeState
 		jeopardyGameBoxScore.IsWinner = contestants[i].GameWinner
@@ -246,10 +240,10 @@ func getContestantInformation(doc *goquery.Document, episode string) ([]model.Co
 		}
 
 		contestant := model.Contestant{
-			FirstName: firstName,
-			LastName:  lastName,
-			HomeCity:  homeCity,
-			HomeState: homeState,
+			ContestantFirstName: firstName,
+			ContestantLastName:  lastName,
+			HomeCity:            homeCity,
+			HomeState:           homeState,
 		}
 		contestants = append(contestants, contestant)
 	})
@@ -262,7 +256,7 @@ func getContestantInformation(doc *goquery.Document, episode string) ([]model.Co
 	})
 
 	for i := 0; i < len(contestants); i++ {
-		if contestants[i].FirstName == winnerFirstName && contestants[i].LastName == winnerLastName {
+		if contestants[i].ContestantFirstName == winnerFirstName && contestants[i].ContestantLastName == winnerLastName {
 			contestants[i].GameWinner = true
 		} else {
 			contestants[i].GameWinner = false
