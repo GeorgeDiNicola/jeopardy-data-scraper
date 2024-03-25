@@ -26,9 +26,9 @@ func (suite *ScraperSuite) SetupTest() {
 }
 
 func (s *ScraperSuite) TestGetNumberOfTripleStumpers() {
-	numberOfTripleStrumpersFound, err := getNumberOfTripleStumpers(s.DefaultDoc, s.DefaultEpisodeId)
+	numberOfTripleStumpersFound, err := getNumberOfTripleStumpers(s.DefaultDoc, s.DefaultEpisodeId)
 	s.NoError(err)
-	s.Equal(4, numberOfTripleStrumpersFound)
+	s.Equal(4, numberOfTripleStumpersFound)
 }
 
 func (s *ScraperSuite) TestGetGameTotals() {

@@ -18,7 +18,7 @@ func writeBoxScoreHistoryToExcel(scores []JeopardyGameBoxScore) {
 		"Starting FJ Score", "FJ Wager", "Final Score",
 		"Att Total", "Buz Total", "Buz Percentage Total", "Correct Total", "Incorrect Total", "Correct Percentage Total",
 		"Daily Double Correct Total", "Daily Double Incorrect Total", "Daily Double Winnings Total",
-		"Final Score Total", "Total Triple Strumpers", "Coryat Score",
+		"Final Score Total", "Total Triple Stumpers", "Coryat Score",
 	}
 
 	for i, header := range headers {

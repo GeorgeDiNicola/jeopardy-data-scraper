@@ -14,39 +14,20 @@ Web scraper for parsing, transforming, and storing data from https://www.jeopard
 ![Jeopardata System Design](docs/Jeopardy-System-Design.png)
 *Application scheduled to execute once per day after the Jeopardata posts to extract the most recent Jeopardy episode data it does not know of, then saves it to the DB.
 
-## Tableau Dashboard Project - Visualization of Jeopardy game data trends over time.
-### Project Link: https://public.tableau.com/app/profile/george.dinicola/viz/JeopardyStatistics
+## Tableau Dashboard Project - Visualization of Jeopardy game data trends over time
+## Project Link: https://public.tableau.com/app/profile/george.dinicola/viz/JeopardyStatistics
 ### Design: 
 ![Tableau Dashboard Project Design](docs/Tableau-Dashboard-Design.png)
 
+## API Endpoints
+| Operation | Endpoint                           | Description |
+|-----------|------------------------------------|-------------|
+| GET       | `/v1/episodes`                     | Basic Information. Retrieves a list of episodes, optionally filtered by date range or specific attributes like episode number.<br>**Params:**<ul><li>`startDate` (optional)</li><li>`endDate` (optional)</li><li>`episodeNumber` (optional)</li></ul> |
+| GET       | `/v1/episodes/{episodeNumber}`     | Game Episode Information. Retrieves detailed information about a specific episode, including contestant details and scores.<br>**Params:**<ul><li>`episodeNumber`</li></ul> |
+| GET       | `/v1/episodes/{episodeNumber}/performance` | Game Episode Information. Retrieves information about contestants, potentially filtered by name, home city, or state.<br>**Params:**<ul><li>`episodeNumber`</li><li>`gameWinner` - filters for game winners (i.e. game champion stats only)</li></ul> |
+| GET       | `/v1/contestants`                  | Contestant Information. Retrieves information about contestants, potentially filtered by name, home city, or state.<br>**Params:**<ul><li>`lastName` (optional)</li><li>`firstName` (optional)</li><li>`homeCity` (optional)</li><li>`homeState` (optional)</li></ul> |
+| GET       | `/v1/export`                       | Data Export. Exports all of the data to the user's web browser.<br>**Params:**<ul><li>`fileType` (default: csv)</li></ul>Supported data types: CSV, XLSX, JSON, Google Sheets |
 
-## Definitions:
-- **EOR** - Score at the end of the round
-- **ATT** - Attempts to buzz in
-- **BUZ** - number of times a contestant buzzed in
-- **BUZ %** -  percentage individual contestant buzzed in vs. attempts
-- **COR/INC** - How many correct/incorrect responses
-- **CORRECT %** - percentage of correct responses
-- **DD** - Daily Double/FJ Final Jeopardy!
-- **Triple Stumper** - Clues (except DD) for which none of the contestants provide a correct response
-
-## Jeopardata API Endpoints
-### Basic Information
-- List all episode numbers, dates, and titles: /v1/jeopardata/**episodes**
-- Get an array of data from a specific episode by episode number or date: /v1/jeopardata/episodes/**{date}|{episode-number}**
-
-### Contestant Info
-- Get an array of contestants from an episode number or date:  /v1/jeopardata/episodes/{date}|{episodeNumber}/**contestants**
-- Get a specific contestant's information/metadata from an episode number or date: /v1/jeopardata/episodes/{date}|{episodeNumber}/**contestants/{last-name}**
-
-### Game Rounds and Scores
-- /v1/jeopardata/episodes/{date}|{episodeNumber}/**jeopardyRoundScores**
-- /v1/jeopardata/episodes/{date}|{episodeNumber}/**doubleJeopardyRoundScores**
-- /v1/jeopardata/episodes/{date}|{episodeNumber}/**finalJeopardyScores**
-- /v1/jeopardata//episodes/{date}|{episodeNumber}/**gameTotals**
-
-### Get Game Notes for an Episode
-- /v1/jeopardata/episodes/{date}|{episodeNumber}/**notes**
 
 ## Algorithms for Scraping the Jeopardy Web Data
 ### Algorithm for Bulk Scrape
