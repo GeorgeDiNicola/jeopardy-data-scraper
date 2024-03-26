@@ -1,5 +1,7 @@
-run:
-	go run cmd/jeopardy-data-scraper/main.go
+run-full:
+	go run cmd/jeopardy-data-scraper/main.go "FULL"
+run-incremental:
+	go run cmd/jeopardy-data-scraper/main.go "INCREMENTAL"
 
 test:
 	go test -cover -v ./...

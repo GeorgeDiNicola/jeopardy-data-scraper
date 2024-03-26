@@ -6,11 +6,16 @@ import (
 	"georgedinicola/jeopardy-data-scraper/internal/scraper"
 	"georgedinicola/jeopardy-data-scraper/internal/util"
 	"log"
+	"os"
 )
 
 func main() {
-	mode := "FULL"      // TODO: make this an input to the main function
-	numberOfPages := 73 // TODO: make this dynamic
+	if len(os.Args) < 2 {
+		log.Fatalf("Usage: %s <mode>", os.Args[0])
+	}
+	mode := os.Args[1]
+
+	numberOfPages := 73 // TODO: add function that goes and gets max # of pages
 	var jeopardyBoxScores []model.JeopardyGameBoxScore
 
 	err := db.CreateDatabaseIfDoesNotExist()
@@ -46,6 +51,7 @@ func main() {
 		if err != nil {
 			log.Fatal("Error querying for the most recent episode date: ", err)
 		}
+
 		jeopardyBoxScores = scraper.ScrapeGameDataIncremental(mostRecentEpisodeNum, numberOfPages)
 
 		if len(jeopardyBoxScores) > 0 {
