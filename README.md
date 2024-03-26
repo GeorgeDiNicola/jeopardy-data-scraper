@@ -7,13 +7,13 @@ It also powers [this Tableau Public Dashboard](https://public.tableau.com/app/pr
 - Incremental data scrape and store
 
 ## Design Goals
-- Provide an API and file export mechanisms for data analyst Jeopardy fans to easily explore Jeopardata
-- Analyze and identify patterns in Jeopardy gameplay over time, such as presenting inflection points in data from influential players like James Holzhauer
+- Provide an API and file export mechanisms for data analyst Jeopardy! fans to easily explore Jeopardata
+- Analyze and identify patterns in Jeopardy! gameplay over time, such as presenting inflection points in data from influential players like James Holzhauer
 - Provide a location to store historic Jeopardy! data in a transformed format more suitable for data-driven analysis and applications
 
 ## System Design
 ![Jeopardata System Design](docs/Jeopardy-System-Design.png)
-*Application scheduled to execute once per day after the Jeopardata posts to extract the most recent Jeopardy episode data it does not know of, then saves it to the DB
+*Application scheduled to execute once per day after the Jeopardata posts to extract the most recent Jeopardy! episode data it does not know of, then saves it to the DB
 
 ## Data Persistence Layer
 - Database Product: **PostgreSQL**
@@ -63,13 +63,6 @@ It also powers [this Tableau Public Dashboard](https://public.tableau.com/app/pr
 | TotalGameDailyDoubleWinnings      | integer      | Total winnings from daily doubles throughout the game            |
 | TotalGameScore                    | integer      | Total score at the end of the game                               |
 | TotalTripleStumpers               | integer      | Total number of triple stumpers throughout the game              |
-
-
-
-## Tableau Dashboard Project - Visualization of Jeopardy game data trends over time
-### Project Link: [Tableau Public Dashboard](https://public.tableau.com/app/profile/george.dinicola/viz/JeopardyStatistics)
-### Design: 
-![Tableau Dashboard Project Design](docs/Tableau-Dashboard-Design.png)
 
 ## Algorithms for Scraping the Jeopardy Web Data
 ### Algorithm for Bulk Scrape
