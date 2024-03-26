@@ -10,10 +10,11 @@ import (
 )
 
 func main() {
-	if len(os.Args) < 2 {
-		log.Fatalf("Usage: %s <mode>", os.Args[0])
+	// control the mode from the container env
+	appMode := os.Getenv("APP_MODE")
+	if appMode == "" {
+		appMode = "INCREMENTAL"
 	}
-	mode := os.Args[1]
 
 	numberOfPages := 73 // TODO: add function that goes and gets max # of pages
 	var jeopardyBoxScores []model.JeopardyGameBoxScore
@@ -30,7 +31,7 @@ func main() {
 		return
 	}
 
-	if mode == "FULL" {
+	if appMode == "FULL" {
 		err = db.CreateJeopardyGameBoxScoreTable()
 		if err != nil {
 			log.Fatalf("failed to create the table: %v", err)
@@ -46,7 +47,7 @@ func main() {
 			log.Println("no jeopardata records to extract")
 		}
 
-	} else if mode == "INCREMENTAL" {
+	} else if appMode == "INCREMENTAL" {
 		mostRecentEpisodeNum, err := db.GetMostRecentEpisodeNumber()
 		if err != nil {
 			log.Fatal("Error querying for the most recent episode date: ", err)
@@ -61,7 +62,7 @@ func main() {
 			log.Println("no new jeopardata records to extract")
 		}
 	} else {
-		log.Fatalf("invalid mode: %s", mode)
+		log.Fatalf("invalid mode: %s", appMode)
 		return
 	}
 }
