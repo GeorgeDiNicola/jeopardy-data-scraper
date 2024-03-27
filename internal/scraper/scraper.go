@@ -75,7 +75,6 @@ func ScrapeGameDataFull(totalNumberOfPages int) []model.JeopardyGameBoxScore {
 	var allEpisodeJeopardyGameBoxScores []model.JeopardyGameBoxScore
 
 	for i := 0; i <= totalNumberOfPages; i++ {
-
 		doc, err := getJeopardataWebPage(i)
 		if err != nil {
 			log.Fatal("Error getting the Jeopardata web page: ", err)
@@ -99,7 +98,6 @@ func ScrapeGameDataFull(totalNumberOfPages int) []model.JeopardyGameBoxScore {
 		// delay to avoid rate limiting from Jepoardy.com
 		time.Sleep(config.DelayBetweenRequests * time.Second)
 	}
-
 	return allEpisodeJeopardyGameBoxScores
 }
 

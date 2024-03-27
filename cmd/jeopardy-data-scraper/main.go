@@ -1,6 +1,7 @@
 package main
 
 import (
+	"georgedinicola/jeopardy-data-scraper/internal/config"
 	"georgedinicola/jeopardy-data-scraper/internal/db"
 	"georgedinicola/jeopardy-data-scraper/internal/model"
 	"georgedinicola/jeopardy-data-scraper/internal/scraper"
@@ -10,15 +11,32 @@ import (
 )
 
 func main() {
+	var jeopardyBoxScores []model.JeopardyGameBoxScore
+	numberOfPages := 73 // TODO: add function that goes and gets max # of pages
+
 	// control the mode from the container env
 	appMode := os.Getenv("APP_MODE")
 	if appMode == "" {
-		appMode = "INCREMENTAL"
+		appMode = "EXCEL"
 	}
 
-	numberOfPages := 73 // TODO: add function that goes and gets max # of pages
-	var jeopardyBoxScores []model.JeopardyGameBoxScore
+	// Handle excel mode
+	if appMode == "EXCEL" {
+		jeopardyBoxScores = scraper.ScrapeGameDataFull(numberOfPages)
+		if len(jeopardyBoxScores) > 0 {
+			err := util.WriteBoxScoreHistoryToExcel(config.OutputFileName, jeopardyBoxScores)
+			if err != nil {
+				log.Fatalf("failed to write the file: %v", err)
+			}
+		} else {
+			log.Fatal("no jeopardata records found!")
+		}
 
+		os.Exit(0)
+		return
+	}
+
+	// Handle DB modes
 	err := db.CreateDatabaseIfDoesNotExist()
 	if err != nil {
 		log.Fatalf("failed to create the DB: %v", err)
@@ -42,7 +60,6 @@ func main() {
 
 		if len(jeopardyBoxScores) > 0 {
 			db.SaveJeopardyGameBoxScore(jeopardyBoxScores)
-			util.WriteBoxScoreHistoryToExcel("jeopardata_box_scores_sample.xlsx", jeopardyBoxScores)
 		} else {
 			log.Println("no jeopardata records to extract")
 		}
@@ -57,7 +74,6 @@ func main() {
 
 		if len(jeopardyBoxScores) > 0 {
 			db.SaveJeopardyGameBoxScore(jeopardyBoxScores)
-			util.WriteBoxScoreHistoryToExcel("jeopardata_box_scores_sample.xlsx", jeopardyBoxScores)
 		} else {
 			log.Println("no new jeopardata records to extract")
 		}

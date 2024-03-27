@@ -38,7 +38,7 @@ func CreateNewGormDbConnection() (DatabaseConnx, error) {
 	return DatabaseConnx{gormDB}, nil
 }
 
-// no usage of gorm. Only needed for DB creation since gorm only does ORM
+// no usage of gorm. Nneeded for DB creation since gorm only does ORM
 func CreateDatabaseIfDoesNotExist() error {
 	dbHost, dbUsername, dbPassword := os.Getenv("DB_HOST"), os.Getenv("DB_USERNAME"), os.Getenv("DB_PASSWORD")
 	dbName, dbPort, dbTimezone := os.Getenv("DB_NAME"), os.Getenv("DB_PORT"), os.Getenv("DB_TIMEZONE")

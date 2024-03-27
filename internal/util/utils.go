@@ -31,7 +31,7 @@ func GetStateFullName(input string) string {
 	}
 }
 
-func WriteBoxScoreHistoryToExcel(fileName string, scores []model.JeopardyGameBoxScore) {
+func WriteBoxScoreHistoryToExcel(filePath string, scores []model.JeopardyGameBoxScore) error {
 	f := excelize.NewFile()
 	sheetName := "Sheet1"
 
@@ -77,7 +77,10 @@ func WriteBoxScoreHistoryToExcel(fileName string, scores []model.JeopardyGameBox
 		}
 	}
 
-	if err := f.SaveAs(fileName); err != nil {
+	if err := f.SaveAs(filePath); err != nil {
 		log.Printf("Failed to save the Excel file: %v", err)
+		return err
 	}
+
+	return nil
 }

@@ -16,11 +16,14 @@ DB_NAME ?= default_db
 
 
 # Execution
-run-incremental:
-	docker run -e DB_HOST=$(DB_HOST) -e DB_USERNAME=$(DB_USERNAME) -e DB_PASSWORD=$(DB_PASSWORD) -e DB_NAME=$(DB_NAME) $(PROJECT_NAME)
+run: build
+	docker run -e APP_MODE="INCREMENTAL" DB_HOST=$(DB_HOST) -e DB_USERNAME=$(DB_USERNAME) -e DB_PASSWORD=$(DB_PASSWORD) -e DB_NAME=$(DB_NAME) $(DOCKER_IMAGE_NAME)
 
-run-full:
-	docker run -e APP_MODE="FULL" -e DB_HOST=$(DB_HOST) -e DB_USERNAME=$(DB_USERNAME) -e DB_PASSWORD=$(DB_PASSWORD) -e DB_NAME=$(DB_NAME) $(PROJECT_NAME)
+run-full: build
+	docker run -e APP_MODE="FULL" -e DB_HOST=$(DB_HOST) -e DB_USERNAME=$(DB_USERNAME) -e DB_PASSWORD=$(DB_PASSWORD) -e DB_NAME=$(DB_NAME) $(DOCKER_IMAGE_NAME)
+
+run-excel: build
+	docker run -e APP_MODE="EXCEL" -v ~/Desktop:/data $(DOCKER_IMAGE_NAME)
 
 stop:
 	docker stop $(DOCKER_IMAGE_NAME)
