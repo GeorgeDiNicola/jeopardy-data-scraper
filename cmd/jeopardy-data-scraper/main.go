@@ -1,13 +1,14 @@
 package main
 
 import (
-	"georgedinicola/jeopardy-data-scraper/internal/config"
-	"georgedinicola/jeopardy-data-scraper/internal/db"
-	"georgedinicola/jeopardy-data-scraper/internal/model"
-	"georgedinicola/jeopardy-data-scraper/internal/scraper"
-	"georgedinicola/jeopardy-data-scraper/internal/util"
 	"log"
 	"os"
+
+	"github.com/georgedinicola/jeopardy-data-scraper/internal/config"
+	"github.com/georgedinicola/jeopardy-data-scraper/internal/db"
+	"github.com/georgedinicola/jeopardy-data-scraper/internal/model"
+	"github.com/georgedinicola/jeopardy-data-scraper/internal/scraper"
+	"github.com/georgedinicola/jeopardy-data-scraper/internal/util"
 )
 
 func main() {

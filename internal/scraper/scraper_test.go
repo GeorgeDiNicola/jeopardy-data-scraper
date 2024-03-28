@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"georgedinicola/jeopardy-data-scraper/testdata"
+	"github.com/georgedinicola/jeopardy-data-scraper/testdata"
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/stretchr/testify/suite"

@@ -10,9 +10,9 @@ import (
 	"strings"
 	"time"
 
-	"georgedinicola/jeopardy-data-scraper/internal/config"
-	"georgedinicola/jeopardy-data-scraper/internal/model"
-	"georgedinicola/jeopardy-data-scraper/internal/util"
+	"github.com/georgedinicola/jeopardy-data-scraper/internal/config"
+	"github.com/georgedinicola/jeopardy-data-scraper/internal/model"
+	"github.com/georgedinicola/jeopardy-data-scraper/internal/util"
 
 	"github.com/PuerkitoBio/goquery"
 )

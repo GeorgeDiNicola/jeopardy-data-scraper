@@ -3,9 +3,10 @@ package db
 import (
 	"database/sql"
 	"fmt"
-	"georgedinicola/jeopardy-data-scraper/internal/model"
 	"log"
 	"os"
+
+	"github.com/georgedinicola/jeopardy-data-scraper/internal/model"
 
 	_ "github.com/lib/pq"
 

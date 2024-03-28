@@ -1,9 +1,10 @@
 package util
 
 import (
-	"georgedinicola/jeopardy-data-scraper/internal/model"
 	"log"
 	"strings"
+
+	"github.com/georgedinicola/jeopardy-data-scraper/internal/model"
 
 	"github.com/xuri/excelize/v2"
 )
