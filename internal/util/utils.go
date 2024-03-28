@@ -4,7 +4,7 @@ import (
 	"log"
 	"strings"
 
-	"github.com/georgedinicola/jeopardy-data-scraper/internal/model"
+	"github.com/georgedinicola/jeopardy-data-scraper/model"
 
 	"github.com/xuri/excelize/v2"
 )

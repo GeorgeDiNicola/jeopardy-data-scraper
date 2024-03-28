@@ -11,8 +11,8 @@ import (
 	"time"
 
 	"github.com/georgedinicola/jeopardy-data-scraper/internal/config"
-	"github.com/georgedinicola/jeopardy-data-scraper/internal/model"
 	"github.com/georgedinicola/jeopardy-data-scraper/internal/util"
+	"github.com/georgedinicola/jeopardy-data-scraper/model"
 
 	"github.com/PuerkitoBio/goquery"
 )

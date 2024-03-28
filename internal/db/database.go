@@ -6,7 +6,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/georgedinicola/jeopardy-data-scraper/internal/model"
+	"github.com/georgedinicola/jeopardy-data-scraper/model"
 
 	_ "github.com/lib/pq"
 

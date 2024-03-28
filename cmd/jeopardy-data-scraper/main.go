@@ -6,9 +6,9 @@ import (
 
 	"github.com/georgedinicola/jeopardy-data-scraper/internal/config"
 	"github.com/georgedinicola/jeopardy-data-scraper/internal/db"
-	"github.com/georgedinicola/jeopardy-data-scraper/internal/model"
 	"github.com/georgedinicola/jeopardy-data-scraper/internal/scraper"
 	"github.com/georgedinicola/jeopardy-data-scraper/internal/util"
+	"github.com/georgedinicola/jeopardy-data-scraper/model"
 )
 
 func main() {
