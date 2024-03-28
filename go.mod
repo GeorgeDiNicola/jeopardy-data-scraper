@@ -1,4 +1,4 @@
-module georgedinicola/jeopardy-data-scraper
+module github.com/georgedinicola/jeopardy-data-scraper
 
 go 1.21.4
 
